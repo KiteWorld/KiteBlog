@@ -3,9 +3,6 @@ var conf = require("../config/db")
 var sql = require("./userSqlMapping");
 var common = require('../common/common')
 var pool = mysql.createPool(conf.mysql)
-var curTime = require("../common/getCurTime");
-const { jsonWrite } = require('../common/common');
-const {	update } = require('./userSqlMapping');
 
 module.exports = {
 	add: function (req, res, next) {
@@ -14,32 +11,6 @@ module.exports = {
 				return
 			}
 			var param = req.body;
-			// connection.query(sql.queryByName, param.name, function (err, result) {
-			// 	if (err) {
-			// 		console.log(err)
-			// 	} else {
-			// 		if (result.length > 0) {
-			// 			result = {
-			// 				code: 1,
-			// 				msg: "用户已存在"
-			// 			}
-			// 		} else {
-			// 			connection.query(sql.insert, [param.name, param.password, param.role, param.sex, curTime], function (err, result) {
-			// 				if (err) {
-			// 					console.log(err)
-			// 				} else {
-			// 					result = {
-			// 						code: 0,
-			// 						msg: "添加成功"
-			// 					}
-			// 				}
-			// 			})
-			// 		}
-			// 	}
-			// 	common.jsonWrite(res, result)
-			// 	connection.release()
-			// })
-
 			let queryByName = () => {
 				return new Promise((resolve, reject) => {
 					connection.query(sql.queryByName, param.name, function (err, result) {
@@ -53,7 +24,7 @@ module.exports = {
 			}
 			let add = () => {
 				return new Promise((resolve, reject) => {
-					connection.query(sql.insert, [param.name, param.password, param.role, param.sex, curTime], function (err, result) {
+					connection.query(sql.insert, [param.name, param.password, param.role, param.sex, common.curTime], function (err, result) {
 						if (err) {
 							reject(result)
 						} else {
@@ -97,7 +68,28 @@ module.exports = {
 				return
 			}
 			var param = req.body
-			connection.query(sql.update, [param.name, param.sex, param.u_icon, param.userId], function (err, result) {
+			connection.query(sql.update, [param.sex, param.iconPath, param.description, param.userId], function (err, result) {
+				if (err) {
+					console.log(err)
+				} else {
+					result = {
+						code: 0,
+						msg: "修改成功"
+					}
+				}
+				common.jsonWrite(res, result)
+				connection.release()
+			})
+
+		})
+	},
+	updateRole: function (req, res, next) {
+		pool.getConnection(function (err, connection) {
+			if (err) {
+				return
+			}
+			var param = req.body
+			connection.query(sql.updateRole, [param.role, param.userId], function (err, result) {
 				if (err) {
 					console.log(err)
 				} else {
@@ -118,7 +110,28 @@ module.exports = {
 				return
 			}
 			var param = req.body
-			connection.query(sql.updateStatus, [param.state, param.userId], function (err, result) {
+			connection.query(sql.updateStatus, [param.status, param.userId], function (err, result) {
+				if (err) {
+					console.log(err)
+				} else {
+					result = {
+						code: 0,
+						msg: "修改成功"
+					}
+				}
+				common.jsonWrite(res, result)
+				connection.release()
+			})
+
+		})
+	},
+	updatePassword: function (req, res, next) {
+		pool.getConnection(function (err, connection) {
+			if (err) {
+				return
+			}
+			var param = req.body
+			connection.query(sql.updatePassword, [param.oldPassword, param.userId, param.newPassword, param.name], function (err, result) {
 				if (err) {
 					console.log(err)
 				} else {
