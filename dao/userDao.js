@@ -1,7 +1,8 @@
 var mysql = require('mysql');
 var conf = require("../config/db")
 var sql = require("./userSqlMapping");
-var common = require('../common/common')
+var common = require('../common/common');
+const express = require('express');
 var pool = mysql.createPool(conf.mysql)
 
 module.exports = {
@@ -11,11 +12,12 @@ module.exports = {
 				return
 			}
 			var param = req.body;
+			console.log(param)
 			let queryByName = () => {
 				return new Promise((resolve, reject) => {
 					connection.query(sql.queryByName, param.name, function (err, result) {
 						if (err) {
-							reject(result)
+							console.log(err)
 						} else {
 							resolve(result)
 						}
@@ -23,10 +25,11 @@ module.exports = {
 				})
 			}
 			let add = () => {
+				console.log(common.curTime())
 				return new Promise((resolve, reject) => {
-					connection.query(sql.insert, [param.name, param.password, param.role, param.sex, common.curTime], function (err, result) {
+					connection.query(sql.insert, [param.name, param.password, param.sex || null, param.icon || null, common.curTime()], function (err, result) {
 						if (err) {
-							reject(result)
+							console.log(err)
 						} else {
 							resolve({
 								code: 0,
@@ -181,13 +184,13 @@ module.exports = {
 						msg: "查询成功"
 					}
 				}
-				common.jsonWrite(res.result)
+				common.jsonWrite(res, result)
 				connection.release()
 			})
 		})
 	},
 	queryAll: function (req, res, next) {
-		const userId = req.query.userId
+		// const userId = req.query.userId
 		pool.getConnection(function (err, connection) {
 			if (err) {
 				return
@@ -201,7 +204,7 @@ module.exports = {
 						msg: "查询成功"
 					}
 				}
-				common.jsonWrite(res.result)
+				common.jsonWrite(res, result)
 				connection.release()
 			})
 		})

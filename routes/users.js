@@ -8,6 +8,10 @@ router.get('/', function (req, res, next) {
   res.send('respond with a resource');
 });
 
+router.get('/queryAll', function (req, res, next) {
+  userDao.queryAll(req, res, next)
+});
+
 router.post('/addUser', function (req, res, next) {
   userDao.add(req, res, next)
 })

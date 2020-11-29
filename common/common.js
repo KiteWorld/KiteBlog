@@ -1,4 +1,4 @@
-let jsonWrite = function (res, ret) {
+var jsonWrite = function (res, ret) {
 	if (typeof ret === "undefined") {
 		res.json({
 			code: "1",
@@ -8,15 +8,15 @@ let jsonWrite = function (res, ret) {
 		res.json(ret)
 	}
 }
-let curTime = function (res, ret) {
-	let date = new Date()
-	let curTime = date.getFullYear() + "-" +
+var curTime = function () {
+	var date = new Date()
+	var time = date.getFullYear() + "-" +
 		(date.getMonth() + 1).toString().padStart(2, "0") + "-" +
 		date.getDate().toString().padStart(2, "0") + ' ' +
 		date.getHours().toString().padStart(2, "0") + ":" +
 		date.getMinutes().toString().padStart(2, "0") + ":" +
 		date.getSeconds().toString().padStart(2, "0")
-	return curTime
+	return time
 }
 
 

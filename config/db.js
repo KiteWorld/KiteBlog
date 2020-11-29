@@ -1,7 +1,7 @@
 //连接数据库信息
 module.exports = {
 	mysql: {
-		host: "127.0.0.1",
+		host: "localhost",
 		user: "root",
 		password: "123456", //填写自己的数据库密码
 		database: "kite_blog", //填写自己的数据库名

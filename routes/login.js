@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-var token = require('../dao/tokenSqlMapping')
+var token = require('../dao/tokenDao')
 
 /* GET users listing. */
 router.post('/login', function (req, res, next) {

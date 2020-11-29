@@ -3,7 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var expressJWT = require('express-jwt');
+// var expressJWT = require('express-jwt');
 
 const EUM = require('./common/enumerate')
 var indexRouter = require('./routes/index');
@@ -24,12 +24,30 @@ app.use(express.urlencoded({
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(expressJWT({
-  secret: EUM.SECRET_KEY,
-  algorithms: ['HS256'],
-}).unless({
-  path: ['/auth', '/auth/adminLogin', "/auth/login"]
-}))
+// app.use(expressJWT({
+//   secret: EUM.SECRET_KEY,
+//   algorithms: ['HS256'],
+// }).unless({
+//   path: ['/', '/auth', '/auth/adminLogin', "/auth/login"]
+// }))
+var mimeType = {
+  'js': 'text/javascript',
+  'html': 'text/html',
+  'css': 'text/css'
+}
+app.all('*', function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', '*');
+  res.header('Access-Control-Allow-Methods', '*');
+  res.header('Content-Type', 'application/json;charset=utf-8');
+  res.header('Content-Type', 'video/mp4');
+  res.header('Content-Type', 'audio/mp3');
+  if (mimeType[req.url.split('.').pop()]) {
+    console.log(req.url.split('.'))
+    res.header('Content-Type', mimeType[req.url.split('.').pop()] + ';charset:UTF-8');
+  }
+  next();
+});
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/auth', loginRouter);
