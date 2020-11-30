@@ -12,7 +12,6 @@ module.exports = {
 				return
 			}
 			var param = req.body;
-			console.log(param)
 			let queryByName = () => {
 				return new Promise((resolve, reject) => {
 					connection.query(sql.queryByName, param.name, function (err, result) {
@@ -25,7 +24,6 @@ module.exports = {
 				})
 			}
 			let add = () => {
-				console.log(common.curTime())
 				return new Promise((resolve, reject) => {
 					connection.query(sql.insert, [param.name, param.password, param.sex || null, param.icon || null, common.curTime()], function (err, result) {
 						if (err) {
@@ -112,8 +110,9 @@ module.exports = {
 			if (err) {
 				return
 			}
-			var param = req.body
-			connection.query(sql.updateStatus, [param.status, param.userId], function (err, result) {
+			let userIds = req.body.userIds
+			let status = req.body.status
+			connection.query(sql.updateStatus(userIds), status, function (err, result) {
 				if (err) {
 					console.log(err)
 				} else {
@@ -190,24 +189,57 @@ module.exports = {
 		})
 	},
 	queryAll: function (req, res, next) {
-		// const userId = req.query.userId
-		pool.getConnection(function (err, connection) {
+		pool.getConnection(async function (err, connection) {
 			if (err) {
 				return
 			}
-			connection.query(sql.queryAll, function (err, result) {
-				if (err) {
 
-				} else {
-					result = {
-						code: 0,
-						msg: "查询成功"
-					}
-				}
-				common.jsonWrite(res, result)
-				connection.release()
-			})
+			let queryUser = () => {
+				return new Promise((resolve, reject) => {
+					connection.query(sql.queryAll, [min, max], function (err, result) {
+						if (err) {
+							console.log(err)
+						} else {
+							resolve({
+								code: 0,
+								data: {
+									users: result.map(x => {
+										x.createTime = common.timeFomatter(x.createTime)
+										return x
+									}),
+									total: 0
+								}
+							})
+						}
+					})
+				})
+			}
+			let queryUserCount = () => {
+				return new Promise((resolve, reject) => {
+					connection.query(sql.queryAllCount, function (err, result) {
+						if (err) {
+							console.log(err)
+						} else {
+							resolve(result[0].total)
+						}
+					})
+				})
+			}
+			const total = await queryUserCount()
+
+			//处理limit 最大最小值
+			const pageSize = req.query.pageSize
+			const page = req.query.page
+			let max = page * pageSize > total ? total : page * pageSize;
+			let min = max - pageSize < 0 ? 0 : max - pageSize;
+
+			let queryRes = await queryUser()
+			queryRes.data.total = total
+
+			common.jsonWrite(res, queryRes)
+			connection.release()
 		})
-	}
+	},
+
 
 }

@@ -10,17 +10,22 @@ var jsonWrite = function (res, ret) {
 }
 var curTime = function () {
 	var date = new Date()
-	var time = date.getFullYear() + "-" +
-		(date.getMonth() + 1).toString().padStart(2, "0") + "-" +
-		date.getDate().toString().padStart(2, "0") + ' ' +
-		date.getHours().toString().padStart(2, "0") + ":" +
-		date.getMinutes().toString().padStart(2, "0") + ":" +
-		date.getSeconds().toString().padStart(2, "0")
-	return time
+	return timeFomatter(date)
 }
+
+var timeFomatter = function (time) {
+	return time.getFullYear() + "-" +
+		(time.getMonth() + 1).toString().padStart(2, "0") + "-" +
+		time.getDate().toString().padStart(2, "0") + ' ' +
+		time.getHours().toString().padStart(2, "0") + ":" +
+		time.getMinutes().toString().padStart(2, "0") + ":" +
+		time.getSeconds().toString().padStart(2, "0")
+}
+
 
 
 module.exports = {
 	jsonWrite,
-	curTime
+	curTime,
+	timeFomatter
 }

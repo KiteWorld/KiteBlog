@@ -40,12 +40,12 @@ app.all('*', function (req, res, next) {
   res.header('Access-Control-Allow-Headers', '*');
   res.header('Access-Control-Allow-Methods', '*');
   res.header('Content-Type', 'application/json;charset=utf-8');
-  res.header('Content-Type', 'video/mp4');
-  res.header('Content-Type', 'audio/mp3');
-  if (mimeType[req.url.split('.').pop()]) {
-    console.log(req.url.split('.'))
-    res.header('Content-Type', mimeType[req.url.split('.').pop()] + ';charset:UTF-8');
-  }
+  // res.header('Content-Type', 'video/mp4');
+  // res.header('Content-Type', 'audio/mp3');
+  // if (mimeType[req.url.split('.').pop()]) {
+  //   console.log(req.url.split('.'))
+  //   res.header('Content-Type', mimeType[req.url.split('.').pop()] + ';charset:UTF-8');
+  // }
   next();
 });
 app.use('/', indexRouter);
