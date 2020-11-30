@@ -31,7 +31,7 @@
 - ..... (.持续更新）
 
 ### 前台界面
-项目链接：[KiteBlog_Front_ToC)](https://github.com/KiteWorld/KiteBlog_Front_ToC)
+项目链接：[KiteBlog_Front_ToC](https://github.com/KiteWorld/KiteBlog_Front_ToC)
 - 文章列表
 - 文章编辑 
 - 关注、搜索、上传、收藏、点赞等常规功能
