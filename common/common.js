@@ -22,10 +22,25 @@ var timeFomatter = function (time) {
 		time.getSeconds().toString().padStart(2, "0")
 }
 
-
+var sqlParamsFomatter = function (param, pre, connection) {
+	if (param instanceof Object) {
+		if (!Object.keys(param).length) {
+			return "1 = 1"
+		}
+		let str = ""
+		for (const key in param) {
+			if (param.hasOwnProperty(key)) {
+				//「connection.escapeId」用于查询标识符转义，connection.escape用于值转义
+				str += `${connection.escapeId(pre + key)} LIKE ${connection.escape("%"+param[key]+"%")}`
+			}
+		}
+		return str
+	}
+}
 
 module.exports = {
 	jsonWrite,
 	curTime,
-	timeFomatter
+	timeFomatter,
+	sqlParamsFomatter
 }

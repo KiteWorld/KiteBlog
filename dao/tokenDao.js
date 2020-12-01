@@ -32,8 +32,8 @@ module.exports = {
 										token: jsonWebToken.sign({
 											userId: userObj.a_id
 										}, ENU.SECRET_KEY, {
-											expiresIn: "24h"
-											// expiresIn: 60 * 60 * 24
+											// expiresIn: "24h",
+											expiresIn: 20
 										}),
 										name: userObj.a_name,
 										role: userObj.a_role,

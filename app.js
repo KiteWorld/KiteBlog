@@ -3,12 +3,16 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-// var expressJWT = require('express-jwt');
+var expressJWT = require('express-jwt');
+
 
 const EUM = require('./common/enumerate')
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var loginRouter = require('./routes/login');
+const {
+  jsonWrite
+} = require('./common/common');
 
 var app = express();
 
@@ -24,12 +28,12 @@ app.use(express.urlencoded({
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// app.use(expressJWT({
-//   secret: EUM.SECRET_KEY,
-//   algorithms: ['HS256'],
-// }).unless({
-//   path: ['/', '/auth', '/auth/adminLogin', "/auth/login"]
-// }))
+app.use(expressJWT({
+  secret: EUM.SECRET_KEY,
+  algorithms: ['HS256'], //6.0需要添加加密方式
+}).unless({
+  path: ['/', '/auth', '/auth/adminLogin', "/auth/login"]
+}))
 var mimeType = {
   'js': 'text/javascript',
   'html': 'text/html',
@@ -57,16 +61,24 @@ app.use(function (req, res, next) {
   next(createError(404));
 });
 
+
 // error handler
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
   res.status(err.status || 500);
-  console.log(err)
-  res.render('error');
+  if (err.name === "UnauthorizedError") {
+    console.log(err.name + 1)
+
+    jsonWrite(res, {
+      code: 911, //call 911!
+      msg: "token已失效，请重新登录账号"
+    })
+  }
+  // render the error page
+
+  // res.render('error');
 });
 
 module.exports = app;

@@ -3,7 +3,6 @@ var router = express.Router();
 
 var token = require('../dao/tokenDao')
 
-/* GET users listing. */
 router.post('/login', function (req, res, next) {
 	token.getToken("user", req, res, next)
 });
