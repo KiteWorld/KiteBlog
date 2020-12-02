@@ -30,15 +30,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(expressJWT({
   secret: EUM.SECRET_KEY,
-  algorithms: ['HS256'], //6.0需要添加加密方式
+  algorithms: ['HS256'], //express-jwt 6.0 需要添加加密方式
 }).unless({
-  path: ['/', '/auth', '/auth/adminLogin', "/auth/login"]
+  path: ['/', '/auth', '/auth/adminLogin', "/auth/login"] //不需要token验证的请求
 }))
+
+//跨域
 var mimeType = {
   'js': 'text/javascript',
   'html': 'text/html',
   'css': 'text/css'
 }
+
 app.all('*', function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', '*');
@@ -68,17 +71,23 @@ app.use(function (err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
   res.status(err.status || 500);
-  if (err.name === "UnauthorizedError") {
-    console.log(err.name + 1)
 
+  // if (err.inner.name === "TokenExpiredError") {
+  //   jsonWrite(res, {
+  //     code: 911, //call 911!
+  //     msg: "token已失效，请重新登录账号"
+  //   })
+  // }
+  if (err.name === "UnauthorizedError") {
+    res.status(401)
     jsonWrite(res, {
       code: 911, //call 911!
-      msg: "token已失效，请重新登录账号"
+      msg: err.message
     })
   }
   // render the error page
 
-  // res.render('error');
+  res.render('error');
 });
 
 module.exports = app;
