@@ -200,14 +200,14 @@ module.exports = {
 			}
 			let queryUser = () => {
 				return new Promise((resolve, reject) => {
-					connection.query(sql.queryAll(sqlParamsFomatter(req.query, "u_", connection)), [index, pageSize], function (err, result) {
+					connection.query(sql.queryAll(sqlParamsFomatter(req.query, "u_", connection, ["name"])), [index, pageSize], function (err, result) {
 						if (err) {
 							console.log(err)
 						} else {
 							resolve({
 								code: 0,
 								data: {
-									users: result.map(x => {
+									dataList: result.map(x => {
 										x.createTime = timeFomatter(x.createTime)
 										return x
 									}),
@@ -220,7 +220,7 @@ module.exports = {
 			}
 			let queryUserCount = () => {
 				return new Promise((resolve, reject) => {
-					connection.query(sql.queryAllCount(sqlParamsFomatter(req.query, "u_", connection)), function (err, result) {
+					connection.query(sql.queryAllCount(sqlParamsFomatter(req.query, "u_", connection, ["name"])), function (err, result) {
 						if (err) {
 							console.log(err)
 						} else {

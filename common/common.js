@@ -22,19 +22,24 @@ var timeFomatter = function (time) {
 		time.getSeconds().toString().padStart(2, "0")
 }
 
-var sqlParamsFomatter = function (param, pre, connection) {
+var sqlParamsFomatter = function (param, pre, connection, fuzzyParams = []) {
 	if (param instanceof Object) {
-		if (!Object.keys(param).length) {
-			return "1 = 1"
-		}
-		let str = ""
+		let filterArr = []
 		for (const key in param) {
-			if (param.hasOwnProperty(key)) {
-				//「connection.escapeId」用于查询标识符转义，connection.escape用于值转义
-				str += `${connection.escapeId(pre + key)} LIKE ${connection.escape("%"+param[key]+"%")}`
+			if (param.hasOwnProperty(key) && param[key]) {
+				if (fuzzyParams.includes(key)) {
+					//「connection.escapeId」用于查询标识符转义，connection.escape用于值转义
+					filterArr.push(`${connection.escapeId(pre + key)} LIKE ${connection.escape(param[key]+"%")}`)
+				} else {
+					filterArr.push(`${connection.escapeId(pre + key)} = ${connection.escape(param[key])}`)
+				}
+
 			}
 		}
-		return str
+		if (!filterArr.length) {
+			return "1 = 1"
+		}
+		return filterArr.join(' and ')
 	}
 }
 
