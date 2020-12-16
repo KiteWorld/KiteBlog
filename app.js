@@ -10,6 +10,7 @@ const EUM = require('./common/enumerate')
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var loginRouter = require('./routes/login');
+var categoryRouter = require('./routes/category');
 const {
   jsonWrite
 } = require('./common/common');
@@ -58,6 +59,7 @@ app.all('*', function (req, res, next) {
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/auth', loginRouter);
+app.use('/category', categoryRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

@@ -1,5 +1,5 @@
-var jsonWrite = function (res, ret) {
-	if (typeof ret === "undefined") {
+let jsonWrite = function (res, ret) {
+	if (typeof ret === "undefined" || ret === null) {
 		res.json({
 			code: "1",
 			msg: "操作失败"
@@ -8,12 +8,12 @@ var jsonWrite = function (res, ret) {
 		res.json(ret)
 	}
 }
-var curTime = function () {
-	var date = new Date()
+let curTime = function () {
+	let date = new Date()
 	return timeFomatter(date)
 }
 
-var timeFomatter = function (time) {
+let timeFomatter = function (time) {
 	return time.getFullYear() + "-" +
 		(time.getMonth() + 1).toString().padStart(2, "0") + "-" +
 		time.getDate().toString().padStart(2, "0") + ' ' +
@@ -22,7 +22,7 @@ var timeFomatter = function (time) {
 		time.getSeconds().toString().padStart(2, "0")
 }
 
-var sqlParamsFomatter = function (param, pre, connection, fuzzyParams = []) {
+let sqlParamsFomatter = function (param, pre, connection, fuzzyParams = []) {
 	if (param instanceof Object) {
 		let filterArr = []
 		for (const key in param) {
@@ -43,9 +43,36 @@ var sqlParamsFomatter = function (param, pre, connection, fuzzyParams = []) {
 	}
 }
 
+let getFilterParams = (param, enu) => {
+	if (!enu instanceof Array) return
+	let props = enu
+	const obj = {}
+	for (const key in param) {
+		if (props.includes(key)) {
+			obj[key] = param[key];
+		}
+	}
+	return obj
+}
+let arrayToObject = (arr) => {
+	let obj = {}
+	arr.forEach(x => {
+		obj[x] = null
+	});
+	return obj
+}
+let fieldsToValues = (params, arr, enu) => {
+	let frontFeilds = arr.map(x => enu[x])
+	let values = frontFeilds.map(x => params[x]) || []
+	return values
+}
+
 module.exports = {
 	jsonWrite,
 	curTime,
 	timeFomatter,
-	sqlParamsFomatter
+	sqlParamsFomatter,
+	getFilterParams,
+	arrayToObject,
+	fieldsToValues
 }

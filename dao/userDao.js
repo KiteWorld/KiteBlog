@@ -158,6 +158,7 @@ module.exports = {
 			if (err) {
 				return
 			}
+			//转义
 			let userIds = connection.escape(req.body.userIds)
 			connection.query(sql.delete(userIds), function (err, result) {
 				if (err) {
