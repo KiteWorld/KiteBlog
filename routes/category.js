@@ -19,6 +19,9 @@ router.post('/insertCategories', function (req, res, next) {
 router.post('/updateCategory', function (req, res, next) {
 	categoryDao.updateCatById(req, res, next)
 });
+router.get('/updateCategoryOrder', function (req, res, next) {
+	categoryDao.updateCategoryOrder(req, res, next)
+});
 
 router.post('/saveCategories', function (req, res, next) {
 	categoryDao.save(req, res, next)

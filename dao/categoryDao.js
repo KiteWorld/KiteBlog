@@ -14,6 +14,239 @@ const e = require('express');
 var pool = mysql.createPool(conf.mysql)
 
 module.exports = {
+
+	delCatById: (req, res, next) => {
+		const categoryId = req.body.categoryId
+		if (!categoryId) return
+		pool.getConnection(async (err, connection) => {
+			if (err) {
+				return console.log(err)
+			}
+			let queryCatArticleCount = () => {
+				return new Promise((resolve, reject) => {
+					connection.query(sql.queryCatArticleCount, categoryId, (err, result) => {
+						if (err) {
+							console.log(err)
+						} else {
+							if (result[0].articleCount) {
+								resolve({
+									code: 1,
+									msg: "该分类下存在文章，请先迁移文章到其他分类再删除!"
+								})
+							} else {
+								resolve(null)
+							}
+						}
+					})
+				})
+			}
+			let queryChildrenCount = () => {
+				return new Promise((resolve, reject) => {
+					connection.query(sql.queryChildrenCount, categoryId, (err, result) => {
+						if (err) {
+							console.log(err)
+						} else {
+							if (result[0].childrenCount) {
+								resolve({
+									code: 1,
+									msg: "该分类存在子分类无法删除"
+								})
+							} else {
+								resolve(null)
+							}
+						}
+					})
+				})
+			}
+			let delCatById = () => {
+				return new Promise((resolve, reject) => {
+					if (err) {
+						return console.log(err)
+					}
+					connection.query(sql.delCatById, categoryId, (err, result) => {
+						if (err) {
+							console.log(err)
+						} else {
+							resolve(result = {
+								code: 0,
+								msg: "删除成功"
+							})
+						}
+					})
+				})
+			}
+			let result = await queryCatArticleCount()
+			if (!result) result = await queryChildrenCount()
+			if (!result) result = await delCatById()
+			jsonWrite(res, result)
+			connection.release()
+		})
+
+	},
+	insertCats: (req, res, next) => {
+		pool.getConnection(function (err, connection) {
+			if (err) {
+				return console.log(err)
+			}
+			if (!req.body.insertCats || !req.body.insertCats instanceof Array) return
+			let valuesList = req.body.insertCats.map(x => {
+				let values = [x.categoryName, x.categoryParentId, x.categoryStatus, x.categoryOrder, x.categoryLevel, x.description]
+				return values
+			})
+			//批量添加，valuesList为数组，数组的每一项也数组（values），就是需要添加的单条数据。传值给query()时，valuesList还需要放在数组里面 [valuesList]
+			connection.query(sql.insertCats, [valuesList], (err, result) => {
+				if (err) {
+					console.log(err)
+				} else {
+					console.log(result)
+					result = {
+						code: 0,
+						data: {
+							categoryId: result.insertId
+						},
+						msg: "添加成功"
+					}
+				}
+				jsonWrite(res, result)
+				connection.release()
+			})
+
+		})
+	},
+	updateCatById: (req, res, next) => {
+		pool.getConnection(function (err, connection) {
+			if (err) {
+				return console.log(err)
+			}
+			let params = req.body;
+			let values = [params.categoryName, params.categoryParentId, params.categoryStatus, params.categoryOrder, params.description, params.categoryId]
+			connection.query(sql.updateCatById, values, (err, result) => {
+				if (err) {
+					console.log(err)
+				} else {
+					result = {
+						code: 0,
+						msg: "修改成功"
+					}
+				}
+				jsonWrite(res, result)
+				connection.release()
+			})
+
+		})
+	},
+	updateCategoryOrder: (req, res, next) => {
+		pool.getConnection(function (err, connection) {
+			if (err) {
+				return console.log(err)
+			}
+			//get方法url，传boolean值，传的是字符串。
+			connection.query(sql.updateCategoryOrder, [req.query.categoryOrder, req.query.categoryId], (err, result) => {
+				if (err) {
+					console.log(err)
+				} else {
+					result = {
+						code: 0,
+						msg: "修改成功"
+					}
+				}
+				jsonWrite(res, result)
+				connection.release()
+			})
+
+		})
+	},
+	queryAllCatsList: (req, res, next) => {
+		pool.getConnection(function (err, connection) {
+			if (err) {
+				return console.log(err)
+			}
+			connection.query(sql.queryAllCatsList, (err, result) => {
+				if (err) {
+					console.log(err)
+				} else {
+					result = {
+						code: 0,
+						data: {
+							dataList: result
+						},
+						msg: "查询成功"
+					}
+				}
+				jsonWrite(res, result)
+				connection.release()
+			})
+		})
+	},
+	queryAllCats: (req, res, next) => {
+		pool.getConnection(function (err, connection) {
+			if (err) {
+				console.log(err)
+				return
+			}
+			connection.query(sql.queryAllCats, (err, result) => {
+				let dataList = []
+				if (err) {
+					console.log("err1", err)
+				} else {
+					//区分不同等级的分类
+					let levelObj = {}
+					result.forEach(x => {
+						if (!levelObj[x.categoryLevel]) {
+							levelObj[x.categoryLevel] = []
+						}
+						levelObj[x.categoryLevel].push(x)
+
+					})
+					let levelList = Object.keys(levelObj).sort((a, b) => a - b) //保证先处理等级高的分类
+					let categoryIdIndex = {}
+					levelList.forEach(x => {
+						//一级分类
+						if (x == 1) {
+							dataList.push(...levelObj[x].map((y, i) => {
+								categoryIdIndex[y.categoryId] = [i]
+								y.categoryStatus = Boolean(y.categoryStatus)
+								y.children = []
+								return y
+							}))
+						} else {
+							//其他级别分类
+							levelObj[x].forEach((y, index) => {
+								let parentIndex = categoryIdIndex[y.categoryParentId]
+								categoryIdIndex[y.categoryId] = [...parentIndex, index]
+								let parent = dataList
+								for (let i = 0; i < parentIndex.length; i++) {
+									if (i === 0) {
+										parent = parent[parentIndex[i]]
+									} else {
+										parent = parent.children[parentIndex[i]]
+									}
+								}
+								if (!parent.children) {
+									parent.children = []
+								}
+								//把子类的文章数加到父类
+								// parent.articleCount += y.articleCount
+								y.categoryStatus = Boolean(y.categoryStatus)
+								y.children = []
+								parent.children.push(y)
+							})
+						}
+					})
+				}
+				result = {
+					code: 0,
+					data: {
+						dataList: dataList
+					},
+					msg: "查询成功"
+				}
+				jsonWrite(res, result)
+				connection.release()
+			})
+
+		})
+	},
 	//适用于一次性保存。如果类型很多建议改成把 增删改分开
 	save: function (req, res, next) {
 		pool.getConnection(async function (err, connection) {
@@ -135,195 +368,4 @@ module.exports = {
 			})
 		})
 	},
-	delCatById: (req, res, next) => {
-		const categoryId = req.body.categoryId
-		if (!categoryId) return
-		pool.getConnection(async (err, connection) => {
-			if (err) {
-				return console.log(err)
-			}
-			let queryChildrenCount = () => {
-				return new Promise((resolve, reject) => {
-					connection.query(sql.queryChildrenCount, categoryId, (err, result) => {
-						if (err) {
-							console.log(err)
-						} else {
-							if (result[0].childrenCount) {
-								resolve({
-									code: 1,
-									msg: "该分类存在子分类无法删除"
-								})
-							} else {
-								resolve(null)
-							}
-						}
-					})
-				})
-			}
-			let delCatById = () => {
-				return new Promise((resolve, reject) => {
-					if (err) {
-						return console.log(err)
-					}
-					connection.query(sql.delCatById, categoryId, (err, result) => {
-						if (err) {
-							console.log(err)
-						} else {
-							resolve(result = {
-								code: 0,
-								msg: "删除成功"
-							})
-						}
-					})
-				})
-			}
-			let result = await queryChildrenCount()
-			if (!result) result = await delCatById()
-			jsonWrite(res, result)
-			connection.release()
-		})
-
-	},
-	insertCats: (req, res, next) => {
-		pool.getConnection(function (err, connection) {
-			if (err) {
-				return console.log(err)
-			}
-			if (!req.body.insertCats || !req.body.insertCats instanceof Array) return
-			let valuesList = req.body.insertCats.map(x => {
-				let values = fieldsToValues(x, ["cat_name", "cat_parentid", "cat_status", "cat_order", "cat_level", "cat_description"], CATEGORY_TO_FRONT)
-				return values
-			})
-			//批量添加，valuesList为数组，数组的每一项也数组（values），就是需要添加的单条数据。传值给query()时，valuesList还需要放在数组里面 [valuesList]
-			connection.query(sql.insertCats, [valuesList], (err, result) => {
-				if (err) {
-					console.log(err)
-				} else {
-					console.log(result)
-					result = {
-						code: 0,
-						data: {
-							categoryId: result.insertId
-						},
-						msg: "添加成功"
-					}
-				}
-				jsonWrite(res, result)
-				connection.release()
-			})
-
-		})
-	},
-	updateCatById: (req, res, next) => {
-		pool.getConnection(function (err, connection) {
-			if (err) {
-				return console.log(err)
-			}
-			let values = fieldsToValues(req.body, ["cat_name", "cat_parentid", "cat_status", "cat_order", "cat_description", "cat_id"], CATEGORY_TO_FRONT)
-			connection.query(sql.updateCatById, values, (err, result) => {
-				if (err) {
-					console.log(err)
-				} else {
-					result = {
-						code: 0,
-						msg: "修改成功"
-					}
-				}
-				jsonWrite(res, result)
-				connection.release()
-			})
-
-		})
-	},
-	queryAllCatsList: (req, res, next) => {
-		pool.getConnection(function (err, connection) {
-			if (err) {
-				return console.log(err)
-			}
-			connection.query(sql.queryAllCatsList, (err, result) => {
-				if (err) {
-					console.log(err)
-				} else {
-					result = {
-						code: 0,
-						data: {
-							dataList: result
-						},
-						msg: "查询成功"
-					}
-				}
-				jsonWrite(res, result)
-				connection.release()
-			})
-		})
-	},
-	queryAllCats: (req, res, next) => {
-		pool.getConnection(function (err, connection) {
-			if (err) {
-				console.log(err)
-				return
-			}
-			connection.query(sql.queryAllCats, (err, result) => {
-				let dataList = []
-				if (err) {
-					console.log("err1", err)
-				} else {
-					//区分不同等级的分类
-					let levelObj = {}
-					result.forEach(x => {
-						if (!levelObj[x.categoryLevel]) {
-							levelObj[x.categoryLevel] = []
-						}
-						levelObj[x.categoryLevel].push(x)
-
-					})
-					let levelList = Object.keys(levelObj).sort() //保证先处理等级高的分类
-					let categoryIdIndex = {}
-					levelList.forEach(x => {
-						//一级分类
-						if (x == 1) {
-							dataList.push(...levelObj[x].map((y, i) => {
-								categoryIdIndex[y.categoryId] = [i]
-								y.children = []
-								return y
-							}))
-						} else {
-							//其他级别分类
-							levelObj[x].forEach((y, index) => {
-								let parentIndex = categoryIdIndex[y.categoryParentId]
-								categoryIdIndex[y.categoryId] = [...parentIndex, index]
-								let parent = dataList
-								for (let i = 0; i < parentIndex.length; i++) {
-									if (i === 0) {
-										parent = parent[parentIndex[i]]
-									} else {
-										parent = parent.children[parentIndex[i]]
-									}
-								}
-								if (!parent.children) {
-									parent.children = []
-								}
-								//把子类的文章数加到父类
-								parent.articleCount += y.articleCount
-								y.children = []
-								parent.children.push(y)
-							})
-						}
-					})
-				}
-				result = {
-					code: 0,
-					data: {
-						dataList: dataList
-					},
-					msg: "查询成功"
-				}
-				jsonWrite(res, result)
-				connection.release()
-			})
-
-		})
-	},
-
-
 }
