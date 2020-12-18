@@ -192,6 +192,7 @@ module.exports = {
 					//区分不同等级的分类
 					let levelObj = {}
 					result.forEach(x => {
+						x.children = []
 						if (!levelObj[x.categoryLevel]) {
 							levelObj[x.categoryLevel] = []
 						}
@@ -206,14 +207,12 @@ module.exports = {
 							dataList.push(...levelObj[x].map((y, i) => {
 								categoryIdIndex[y.categoryId] = [i]
 								y.categoryStatus = Boolean(y.categoryStatus)
-								y.children = []
 								return y
 							}))
 						} else {
 							//其他级别分类
 							levelObj[x].forEach((y, index) => {
 								let parentIndex = categoryIdIndex[y.categoryParentId]
-								categoryIdIndex[y.categoryId] = [...parentIndex, index]
 								let parent = dataList
 								for (let i = 0; i < parentIndex.length; i++) {
 									if (i === 0) {
@@ -222,14 +221,15 @@ module.exports = {
 										parent = parent.children[parentIndex[i]]
 									}
 								}
+
 								if (!parent.children) {
 									parent.children = []
 								}
 								//把子类的文章数加到父类
 								// parent.articleCount += y.articleCount
 								y.categoryStatus = Boolean(y.categoryStatus)
-								y.children = []
 								parent.children.push(y)
+								categoryIdIndex[y.categoryId] = [...parentIndex, parent.children.length - 1]
 							})
 						}
 					})
