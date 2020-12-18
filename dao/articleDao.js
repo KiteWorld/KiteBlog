@@ -1,14 +1,141 @@
-let sql = {
-	addArticle: "insert into a_article (a_title,a_content,a_createdate,a_updatedate,a_banner,a_status,u_id) values(?,?,?,?,?,?,?,?,?)",
-	queryArticle: (filters) => `select a_title as title, a_content as content,a_createdate as createDate,a_updatedate as a_updateDate,a_banner as banner ,a_viewcount as viewCount,a_likecount as likeCount from d_article where ${filters} limit ?,?`,
-	queryArticleById: "select a_title as title, a_content as content,a_createdate as createDate,a_updatedate as a_updateDate,a_banner as banner,a_viewcount as viewCount,a_likecount as likeCount from d_article where a_id=?",
-	queryArticleByCatId: (filters) => `select a_title as title, a_content as content,a_createdate as createDate,a_updatedate as a_updateDate,a_banner as banner,a_viewcount as viewCount,a_likecount as likeCount from d_article where cat_id=? where ${filters} limit ?,?`,
-	queryArticleListByUId: "select a_title as title, a_content as content,a_createdate as createDate,a_updatedate as a_updateDate,a_banner as banner,a_viewcount as viewCount,a_likecount as likeCount from d_article where u_id=? limit ?,?",
-	saveLike: "update a_article set a_likecount = a_likecount+1  where a_id=?",
-	cancelLike: "update a_article set a_likecount = a_likecount-1  where a_id=?",
-	addViewCount: "update a_article set a_viewcount = a_viewcount+1 where a_id=?",
-	updateArticle: "update a_article set a_title=?,a_content=?,a_banner=?,a_status=?,a_updatedate=? where a_id=?",
-	updateArticleStatus: "update a_article set a_status=? where a_id=?",
-	deleteArticle: "delete * from a_article where a_id=?",
-
+let mysql = require("mysql")
+let conf = require("../config/db")
+let sql = require("./articleSqlMapping");
+const {
+	jsonWrite,
+	timeFomatter,
+	sqlFieldsFomatter
+} = require("../common/common");
+let pool = mysql.createPool(conf.mysql)
+module.exports = {
+	addAticle: (req, res, next) => {
+		pool.getConnection((err, connection) => {
+			if (err) return
+			let param = req.body;
+			connection.query(sql.addArticle)
+		})
+	},
+	deleteArticle: (req, res, next) => {
+		let articleIds = req.body.articleIds
+		if (!articleIds || articleIds.length == 0) return
+		pool.getConnection((err, connection) => {
+			if (err) return
+			connection.query(sql.deleteArticle, [articleIds], (err, result) => {
+				if (err) return console.log(err)
+				result = {
+					code: 0,
+					msg: "删除成功"
+				}
+				jsonWrite(res, result)
+				connection.release()
+			})
+		})
+	},
+	auditedAticle: (req, res, next) => {
+		let articleIds = req.body.articleIds
+		if (!articleIds || articleIds.length == 0) return
+		pool.getConnection((err, connection) => {
+			if (err) return
+			connection.query(sql.updateArticleStatus, ["audited", articleIds], (err, result) => {
+				if (err) return console.log(err)
+				result = {
+					code: 0,
+					msg: "审核成功"
+				}
+				jsonWrite(res, result)
+				connection.release()
+			})
+		})
+	},
+	rejectArticle: (req, res, next) => {
+		let articleIds = req.body.articleIds
+		if (!articleIds || articleIds.length == 0) return
+		let rejectRemark = req.body.rejectRemark
+		pool.getConnection((err, connection) => {
+			if (err) return
+			connection.query(sql.rejectArticle, ["reject", rejectRemark, articleIds], (err, result) => {
+				if (err) return console.log(err)
+				result = {
+					code: 0,
+					msg: "驳回成功"
+				}
+				jsonWrite(res, result)
+				connection.release()
+			})
+		})
+	},
+	queryArticles: (req, res, next) => {
+		pool.getConnection(async (err, connection) => {
+			if (err) return
+			let filterContent = sqlFieldsFomatter(req.query, "a_", connection, ["title", "name"], ["pageSize", "page"]);
+			let queryArticles = () => {
+				return new Promise((resolve, reject) => {
+					connection.query(sql.queryArticles(filterContent), [index, pageSize], (err, result) => {
+						if (err) {
+							console.log(err)
+						} else {
+							console.log(result)
+							resolve({
+								code: 0,
+								data: {
+									dataList: result.map(x => {
+										x.createDate = timeFomatter(x.createDate)
+										x.updateDate = timeFomatter(x.updateDate)
+										return x
+									}),
+								},
+								total: 0
+							})
+						}
+					})
+				})
+			}
+			let queryArticlesCount = () => {
+				return new Promise((resolve, reject) => {
+					connection.query(sql.queryArticlesCount(filterContent), function (err, result) {
+						if (err) {
+							console.log(err)
+						} else {
+							resolve(result[0].total)
+						}
+					})
+				})
+			}
+			const pageSize = Number(req.query.pageSize)
+			const page = Number(req.query.page)
+			let index;
+			let queryRes;
+			if (pageSize <= 0 || page <= 0) {
+				queryRes = {
+					code: 1,
+					msg: "pageSize或page不能为0"
+				}
+			} else {
+				const total = await queryArticlesCount()
+				if (!total) {
+					queryRes = {
+						code: 1,
+						data: {
+							dataList: []
+						},
+						msg: "暂无数据",
+						total: total,
+					}
+				} else {
+					index = (page - 1) * pageSize < 0 ? 0 : (page - 1) * pageSize;
+					if (index > total && total) {
+						queryRes = {
+							code: 1,
+							msg: "已超出了总条数"
+						}
+					} else {
+						queryRes = await queryArticles()
+					}
+					queryRes.total = total
+				}
+			}
+			jsonWrite(res, queryRes)
+			connection.release()
+		})
+	}
 }

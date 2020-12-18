@@ -9,7 +9,7 @@ var sql = {
 	queryByName: "select * from d_user where u_name=?",
 	queryAll: (filters) => `select u_id as userId, u_name as name,u_role as role,u_status as status,u_sex as sex ,u_icon as icon,u_create_time as createTime from d_user where ${filters} limit ?,?`,
 	// queryAll: `select u_id as userId, u_name as name,u_role as role,u_status as status,u_sex as sex ,u_icon as icon,u_create_time as createTime from d_user limit ?,?`,
-	queryAllCount: (filters) => `select COUNT(*) as total from d_user where ${filters}`
+	queryAllCount: (filters) => `select COUNT(*) as total from d_user where ${filters} `
 }
 
 module.exports = sql

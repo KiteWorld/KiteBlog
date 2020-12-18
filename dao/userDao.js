@@ -1,9 +1,8 @@
 var mysql = require('mysql');
 var conf = require("../config/db")
 var sql = require("./userSqlMapping");
-const express = require('express');
 const {
-	sqlParamsFomatter,
+	sqlFieldsFomatter,
 	timeFomatter,
 	curTime,
 	jsonWrite
@@ -196,12 +195,11 @@ module.exports = {
 	},
 	queryAll: function (req, res, next) {
 		pool.getConnection(async function (err, connection) {
-			if (err) {
-				return
-			}
+			if (err) return
+			let filterContent = sqlFieldsFomatter(req.query, "u_", connection, ["name"], ["pageSize", "page"]);
 			let queryUser = () => {
 				return new Promise((resolve, reject) => {
-					connection.query(sql.queryAll(sqlParamsFomatter(req.query, "u_", connection, ["name"])), [index, pageSize], function (err, result) {
+					connection.query(sql.queryAll(filterContent), [index, pageSize], function (err, result) {
 						if (err) {
 							console.log(err)
 						} else {
@@ -221,7 +219,7 @@ module.exports = {
 			}
 			let queryUserCount = () => {
 				return new Promise((resolve, reject) => {
-					connection.query(sql.queryAllCount(sqlParamsFomatter(req.query, "u_", connection, ["name"])), function (err, result) {
+					connection.query(sql.queryAllCount(filterContent), function (err, result) {
 						if (err) {
 							console.log(err)
 						} else {
@@ -240,28 +238,28 @@ module.exports = {
 					msg: "pageSize或page不能为0"
 				}
 			} else {
-				delete req.query.pageSize
-				delete req.query.page
 				const total = await queryUserCount()
 				if (!total) {
 					queryRes = {
 						code: 1,
 						data: {
-							users: []
+							dataList: []
 						},
+						msg: "没有用户数据",
 						total: total,
 					}
-				}
-				index = (page - 1) * pageSize < 0 ? 0 : (page - 1) * pageSize;
-				if (index >= total && total) {
-					queryRes = {
-						code: 1,
-						msg: "已超出了总条数"
-					}
 				} else {
-					queryRes = await queryUser()
+					index = (page - 1) * pageSize < 0 ? 0 : (page - 1) * pageSize;
+					if (index > total && total) {
+						queryRes = {
+							code: 1,
+							msg: "已超出了总条数"
+						}
+					} else {
+						queryRes = await queryUser()
+					}
+					queryRes.total = total
 				}
-				queryRes.total = total
 			}
 			jsonWrite(res, queryRes)
 			connection.release()

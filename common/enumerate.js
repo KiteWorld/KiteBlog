@@ -1,6 +1,3 @@
-// const KET_SALT = {
-// }
-
 const USER_STATUS = {
 
 }

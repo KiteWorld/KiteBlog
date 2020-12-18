@@ -21,19 +21,24 @@ let timeFomatter = function (time) {
 		time.getMinutes().toString().padStart(2, "0") + ":" +
 		time.getSeconds().toString().padStart(2, "0")
 }
-
-let sqlParamsFomatter = function (param, pre, connection, fuzzyParams = []) {
+/* 
+	@param get请求 query对象（url拼接的参数）
+	@pre 表字段前缀
+	@connection connection对象，用于转义
+	@fuzzyParams  需要支持模糊匹配的字段
+	@removeParams 排除的字段。
+*/
+let sqlFieldsFomatter = function (param, pre, connection, fuzzyParams = [], removeParams = []) {
 	if (param instanceof Object) {
 		let filterArr = []
 		for (const key in param) {
-			if (param.hasOwnProperty(key) && param[key]) {
+			if (param.hasOwnProperty(key) && param[key] && !removeParams.includes(key)) {
 				if (fuzzyParams.includes(key)) {
 					//「connection.escapeId」用于查询标识符转义，connection.escape用于值转义
-					filterArr.push(`${connection.escapeId(pre + key)} LIKE ${connection.escape(param[key]+"%")}`)
+					filterArr.push(`${connection.escapeId(pre + key)} LIKE "%"${connection.escape(param[key])}"%"`)
 				} else {
 					filterArr.push(`${connection.escapeId(pre + key)} = ${connection.escape(param[key])}`)
 				}
-
 			}
 		}
 		if (!filterArr.length) {
@@ -71,7 +76,7 @@ module.exports = {
 	jsonWrite,
 	curTime,
 	timeFomatter,
-	sqlParamsFomatter,
+	sqlFieldsFomatter,
 	getFilterParams,
 	arrayToObject,
 	fieldsToValues
