@@ -346,6 +346,9 @@ module.exports = {
 				})
 			}
 			connection.beginTransaction((err) => {
+				if(err){
+					return console.log(err)
+				}
 				let promiseList = []
 				if (addCats.length > 0) promiseList.push(insertCatsDao)
 				if (deleteCatIds.length > 0) promiseList.push(delCatsDao)

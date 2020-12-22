@@ -14,5 +14,11 @@ router.post('/auditedAticle', (res, req, next) => {
 router.post('/rejectArticle', (res, req, next) => {
 	articleDao.rejectArticle(res, req, next)
 })
+router.post('/updateArticleCat', (res, req, next) => {
+	articleDao.updateArticleCat(res, req, next)
+})
+router.post('/updateArticleType', (res, req, next) => {
+	articleDao.updateArticleType(res, req, next)
+})
 
 module.exports = router;

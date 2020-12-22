@@ -6,7 +6,6 @@ let categoryDao = require('../dao/categoryDao')
 router.get('/getCategories', function (req, res, next) {
 	categoryDao.queryAllCats(req, res, next)
 });
-
 router.get('/getCategoriesList', function (req, res, next) {
 	categoryDao.queryAllCatsList(req, res, next)
 });

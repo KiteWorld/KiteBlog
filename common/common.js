@@ -1,3 +1,8 @@
+var async = require('async');
+let mysql = require("mysql")
+let conf = require("../config/db")
+let pool = mysql.createPool(conf.mysql)
+
 let jsonWrite = function (res, ret) {
 	if (typeof ret === "undefined" || ret === null) {
 		res.json({
@@ -47,6 +52,28 @@ let sqlFieldsFomatter = function (param, pre, connection, fuzzyParams = [], remo
 		return filterArr.join(' and ')
 	}
 }
+let queryParamsFilter = function (connection, params, fuzzyParams = [], dateParams = []) {
+	if (params instanceof Object) {
+		let filterArr = []
+		for (const key in params) {
+			if (params.hasOwnProperty(key) && params[key]) {
+				if (fuzzyParams.includes(key)) {
+					//「connection.escapeId」用于查询标识符转义，connection.escape用于值转义
+					filterArr.push(`${connection.escapeId(key)} LIKE "%"${connection.escape(params[key])}"%"`)
+				} else if (dateParams.includes(key)) {
+					filterArr.push(`${connection.escape(params[key][0])} <= ${connection.escapeId(key)}`)
+					filterArr.push(`${connection.escapeId(key)} <= ${connection.escape(params[key][1])}`)
+				} else {
+					filterArr.push(`${connection.escapeId(key)} = ${connection.escape(params[key])}`)
+				}
+			}
+		}
+		if (!filterArr.length) {
+			return "1 = 1"
+		}
+		return filterArr.join(' and ')
+	}
+}
 
 let getFilterParams = (param, enu) => {
 	if (!enu instanceof Array) return
@@ -72,6 +99,57 @@ let fieldsToValues = (params, arr, enu) => {
 	return values
 }
 
+//批量处理、多表数据同步处理的事务
+let execTrans = function (sqlparamsEntities, callback, asyncMethod = "series") {
+	pool.getConnection(function (err, connection) {
+		if (err) {
+			return callback(err, null);
+		}
+		connection.beginTransaction(function (err) {
+			if (err) {
+				return callback(err, null);
+			}
+			var funcAry = [];
+			sqlparamsEntities.forEach(function (sqlItem) {
+				var temp = function (cb) {
+					connection.query(sqlItem.sql, sqlItem.params, function (tErr, rows, fields) {
+						if (tErr) {
+							return cb(tErr, null);
+						} else {
+							return cb(null, 'ok');
+						}
+					})
+				};
+				funcAry.push(temp);
+			});
+			//asyncMethod 只支持 waterfall、series、parallel、auto这是个方法接收的参数是一致的。
+			async [asyncMethod](funcAry, function (error, result) {
+				if (error) {
+					connection.rollback(function (err) {
+						connection.release();
+						error = err || error //如果
+						return callback(error, null);
+					});
+				} else {
+					//提交事务
+					connection.commit(function (err, info) {
+						if (err) {
+							//报错回滚
+							connection.rollback(function (err) {
+								connection.release();
+								return callback(err, null);
+							});
+						} else {
+							connection.release();
+							return callback(null, info);
+						}
+					})
+				}
+			})
+		});
+	});
+};
+
 module.exports = {
 	jsonWrite,
 	curTime,
@@ -79,5 +157,7 @@ module.exports = {
 	sqlFieldsFomatter,
 	getFilterParams,
 	arrayToObject,
-	fieldsToValues
+	fieldsToValues,
+	execTrans,
+	queryParamsFilter
 }

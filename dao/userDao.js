@@ -265,6 +265,4 @@ module.exports = {
 			connection.release()
 		})
 	},
-
-
 }

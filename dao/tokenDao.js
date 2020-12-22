@@ -8,7 +8,6 @@ var pool = mysql.createPool(conf.mysql)
 
 
 module.exports = {
-
 	getToken: function (role, req, res, next) {
 		pool.getConnection(function (err, connection) {
 			if (err) {
