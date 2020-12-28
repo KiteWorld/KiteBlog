@@ -98,9 +98,45 @@ let fieldsToValues = (params, arr, enu) => {
 	let values = frontFeilds.map(x => params[x]) || []
 	return values
 }
-
+//翻页数据处理
+let turnPage = async (req, getItemsCount, getItems) => {
+	const pageSize = Number(req.query.pageSize);
+	const page = Number(req.query.page);
+	let queryRes;
+	let index;
+	if (pageSize <= 0 || page <= 0) {
+		queryRes = {
+			code: 1,
+			msg: "pageSize或page不能为0"
+		}
+	} else {
+		const total = await getItemsCount()
+		if (!total) {
+			queryRes = {
+				code: 1,
+				data: {
+					dataList: []
+				},
+				msg: "暂无数据",
+				total: total,
+			}
+		} else {
+			index = (page - 1) * pageSize < 0 ? 0 : (page - 1) * pageSize;
+			if (index > total && total) {
+				queryRes = {
+					code: 1,
+					msg: "已超出了总条数"
+				}
+			} else {
+				queryRes = await getItems(index, pageSize)
+			}
+			queryRes.total = total
+		}
+	}
+	return queryRes
+}
 //批量处理、多表数据同步处理的事务
-let execTrans = function (sqlparamsEntities, callback, asyncMethod = "series") {
+let transaction = function (sqlparamsEntities, callback, asyncMethod = "series") {
 	pool.getConnection(function (err, connection) {
 		if (err) {
 			return callback(err, null);
@@ -127,7 +163,7 @@ let execTrans = function (sqlparamsEntities, callback, asyncMethod = "series") {
 				if (error) {
 					connection.rollback(function (err) {
 						connection.release();
-						error = err || error //如果
+						error = err || error //如果回滚错误，优先返回回滚错误
 						return callback(error, null);
 					});
 				} else {
@@ -158,6 +194,7 @@ module.exports = {
 	getFilterParams,
 	arrayToObject,
 	fieldsToValues,
-	execTrans,
-	queryParamsFilter
+	transaction,
+	queryParamsFilter,
+	turnPage
 }

@@ -4,7 +4,8 @@ var sql = require("./categoryMapping");
 const {
 	getFilterParams,
 	jsonWrite,
-	fieldsToValues
+	queryParamsFilter,
+	turnPage
 } = require('../common/common');
 const {
 	CATEGORY_TO_DB,
@@ -83,14 +84,14 @@ module.exports = {
 		})
 
 	},
-	insertCats: (req, res, next) => {
-		pool.getConnection(function (err, connection) {
+	insertCats: (req, res, next, isHotPointCat) => {
+		pool.getConnection((err, connection) => {
 			if (err) {
 				return console.log(err)
 			}
 			if (!req.body.insertCats || !req.body.insertCats instanceof Array) return
 			let valuesList = req.body.insertCats.map(x => {
-				let values = [x.categoryName, x.categoryParentId, x.categoryStatus, x.categoryOrder, x.categoryLevel, x.description]
+				let values = [x.categoryName, isHotPointCat ? 0 : params.categoryParentId, , x.categoryStatus, x.categoryOrder, isHotPointCat ? 'hotpoint' : x.categoryLevel, x.description]
 				return values
 			})
 			//批量添加，valuesList为数组，数组的每一项也数组（values），就是需要添加的单条数据。传值给query()时，valuesList还需要放在数组里面 [valuesList]
@@ -98,7 +99,6 @@ module.exports = {
 				if (err) {
 					console.log(err)
 				} else {
-					console.log(result)
 					result = {
 						code: 0,
 						data: {
@@ -119,7 +119,7 @@ module.exports = {
 				return console.log(err)
 			}
 			let params = req.body;
-			let values = [params.categoryName, params.categoryParentId, params.categoryStatus, params.categoryOrder, params.description, params.categoryId]
+			let values = [params.categoryName, params.categoryStatus, params.categoryOrder, params.description, params.categoryId]
 			connection.query(sql.updateCatById, values, (err, result) => {
 				if (err) {
 					console.log(err)
@@ -156,12 +156,12 @@ module.exports = {
 
 		})
 	},
-	queryAllCatsList: (req, res, next) => {
+	queryAllCatsList: (req, res, next, categoryType) => {
 		pool.getConnection(function (err, connection) {
 			if (err) {
 				return console.log(err)
 			}
-			connection.query(sql.queryAllCatsList, (err, result) => {
+			connection.query(sql.queryAllCatsList, categoryType, (err, result) => {
 				if (err) {
 					console.log(err)
 				} else {
@@ -181,10 +181,9 @@ module.exports = {
 	queryAllCats: (req, res, next) => {
 		pool.getConnection(function (err, connection) {
 			if (err) {
-				console.log(err)
-				return
+				return console.log(err)
 			}
-			connection.query(sql.queryAllCats, (err, result) => {
+			connection.query(sql.queryAllCats, "category", (err, result) => {
 				let dataList = []
 				if (err) {
 					console.log("err1", err)
@@ -199,7 +198,10 @@ module.exports = {
 						levelObj[x.categoryLevel].push(x)
 
 					})
-					let levelList = Object.keys(levelObj).sort((a, b) => a - b) //保证先处理等级高的分类
+					//保证等级分类从高到低进行处理，先排序。
+					let levelList = Object.keys(levelObj).sort((a, b) => a - b)
+					//储存每个分类对应的索引，方便往 children 里面追加数据（还可以优化，最后一级的代码其实不用记录，
+					//因为是最后一级，不会再往里面追加子分类，所以没必要。）
 					let categoryIdIndex = {}
 					levelList.forEach(x => {
 						//一级分类
@@ -244,6 +246,53 @@ module.exports = {
 				jsonWrite(res, result)
 				connection.release()
 			})
+
+		})
+	},
+	queryAllHotPointCats: (req, res, next) => {
+		pool.getConnection(async (err, connection) => {
+			if (err) {
+				return console.log(err)
+			}
+			let params = {
+				cat_name: req.query.categoryName
+			}
+			let filterContent = queryParamsFilter(connection, params, ["cat_name"])
+			let queryAllHotPointCats = (index, pageSize) => {
+				return new Promise((resolve, reject) => {
+					connection.query(sql.queryAllHotPointCats(filterContent), "hotpoint", (err, result) => {
+						if (err) {
+							console.log(err)
+						} else {
+							resolve({
+								code: 0,
+								data: {
+									dataList: result.map(x => {
+										x.categoryStatus = Boolean(x.categoryStatus)
+										return x
+									})
+								},
+								msg: "查询成功",
+								total: 0
+							})
+						}
+					})
+				})
+			}
+			let queryCatsCount = () => {
+				return new Promise((resolve, reject) => {
+					connection.query(sql.queryCatsCount, "hotpoint", (err, result) => {
+						if (err) {
+							console.log(err)
+						} else {
+							resolve(result[0].total)
+						}
+					})
+				})
+			}
+			let queryRes = await turnPage(req, queryCatsCount, queryAllHotPointCats)
+			jsonWrite(res, queryRes)
+			connection.release()
 
 		})
 	},
@@ -346,7 +395,7 @@ module.exports = {
 				})
 			}
 			connection.beginTransaction((err) => {
-				if(err){
+				if (err) {
 					return console.log(err)
 				}
 				let promiseList = []

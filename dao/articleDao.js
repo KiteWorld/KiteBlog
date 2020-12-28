@@ -6,7 +6,8 @@ const {
 	jsonWrite,
 	timeFomatter,
 	queryParamsFilter,
-	execTrans
+	transaction,
+	turnPage
 } = require("../common/common");
 const {
 	ARTICLE_TYEP
@@ -19,6 +20,7 @@ module.exports = {
 			connection.query(sql.addArticle)
 		})
 	},
+	//删除
 	deleteArticle: (req, res, next) => {
 		let articleIds = req.body.articleIds
 		if (!articleIds || articleIds.length == 0) return
@@ -38,6 +40,7 @@ module.exports = {
 			})
 		})
 	},
+	//审核
 	auditedAticle: (req, res, next) => {
 		let articleIds = req.body.articleIds
 		if (!articleIds || articleIds.length == 0) return
@@ -57,6 +60,7 @@ module.exports = {
 			})
 		})
 	},
+	//驳回
 	rejectArticle: (req, res, next) => {
 		let articleIds = req.body.articleIds
 		if (!articleIds || articleIds.length == 0) return
@@ -77,11 +81,11 @@ module.exports = {
 			})
 		})
 	},
+	//修改文章类型（热门、置顶、推荐、普通）
 	updateArticleType: (req, res, next) => {
 		let articleIds = req.body.articleIds
 		let articleType = Object.keys(ARTICLE_TYEP).includes(req.body.articleType) ? req.body.articleType : null
 		if (!articleIds || articleIds.length == 0) return
-
 		pool.getConnection((err, connection) => {
 			if (err) {
 				console.log(err)
@@ -100,6 +104,80 @@ module.exports = {
 			})
 		})
 	},
+	//修改文章所属分类
+	updateArticleCat: (req, res, next) => {
+		let articleIds = req.body.articleIds
+		let categoryId = req.body.categoryId
+		let sqlparamsEntities = [{
+			sql: sql.updateArticleCat,
+			params: [categoryId, articleIds]
+		}, {
+			sql: sql.updateAryicleCatRel,
+			params: [categoryId, articleIds]
+		}]
+		transaction(sqlparamsEntities, function (err, info) {
+			var result;
+			if (err) {
+				console.log(err)
+			} else {
+				result = {
+					code: 0,
+					msg: '修改成功'
+				};
+			}
+			jsonWrite(res, result);
+		})
+	},
+	//查询文章（支持标题、创建人、状态、分类、时间段等搜索）
+	queryArticles: (req, res, next) => {
+		pool.getConnection(async (err, connection) => {
+			if (err) return
+			let params = {
+				a_title: req.query.title,
+				a_status: req.query.status,
+				a_createdate: req.query.createDate,
+				a_updatedate: req.query.updateDate,
+				"c.cat_id": req.query.categoryId,
+				u_name: req.query.userName,
+			}
+			let filterContent = queryParamsFilter(connection, params, ["a_title", "u_name"], ["a_createdate", "a_updatedate"])
+			let queryArticles = (index, pageSize) => {
+				return new Promise((resolve, reject) => {
+					connection.query(sql.queryArticles(filterContent), [index, pageSize], (err, result) => {
+						if (err) {
+							console.log(err)
+						} else {
+							resolve({
+								code: 0,
+								data: {
+									dataList: result.map(x => {
+										x.createDate = timeFomatter(x.createDate)
+										x.updateDate = timeFomatter(x.updateDate)
+										return x
+									}),
+								},
+								total: 0
+							})
+						}
+					})
+				})
+			}
+			let queryArticlesCount = () => {
+				return new Promise((resolve, reject) => {
+					connection.query(sql.queryArticlesCount(filterContent), function (err, result) {
+						if (err) {
+							console.log(err)
+						} else {
+							resolve(result[0].total)
+						}
+					})
+				})
+			}
+			let queryRes = await turnPage(req, queryArticlesCount, queryArticles)
+			jsonWrite(res, queryRes)
+			connection.release()
+		})
+	}
 	//
 	// updateArticleCat: (req, res, next) => {
 	// 	let articleIds = req.body.articleIds
@@ -155,108 +233,5 @@ module.exports = {
 	// 		})
 	// 	})
 	// },
-	updateArticleCat: (req, res, next) => {
-		let articleIds = req.body.articleIds
-		let categoryId = req.body.categoryId
-		let sqlparamsEntities = [{
-			sql: sql.updateArticleCat,
-			params: [categoryId, articleIds]
-		}, {
-			sql: sql.updateAryicleCatRel,
-			params: [categoryId, articleIds]
-		}]
-		execTrans(sqlparamsEntities, function (err, info) {
-			var result;
-			if (err) {
-				console.log(err)
-			} else {
-				result = {
-					code: 0,
-					msg: '修改成功'
-				};
-			}
-			jsonWrite(res, result);
-		})
-	},
-	queryArticles: (req, res, next) => {
-		pool.getConnection(async (err, connection) => {
-			if (err) return
-			let params = {
-				a_title: req.query.title,
-				a_status: req.query.status,
-				a_createdate: req.query.createDate,
-				a_updatedate: req.query.updateDate,
-				"c.cat_id": req.query.categoryId,
-				u_name: req.query.userName,
-			}
-			let filterContent = queryParamsFilter(connection, params, ["a_title", "u_name"], ["a_createdate", "a_updatedate"])
-			let queryArticles = () => {
-				return new Promise((resolve, reject) => {
-					connection.query(sql.queryArticles(filterContent), [index, pageSize], (err, result) => {
-						if (err) {
-							console.log(err)
-						} else {
-							resolve({
-								code: 0,
-								data: {
-									dataList: result.map(x => {
-										x.createDate = timeFomatter(x.createDate)
-										x.updateDate = timeFomatter(x.updateDate)
-										return x
-									}),
-								},
-								total: 0
-							})
-						}
-					})
-				})
-			}
-			let queryArticlesCount = () => {
-				return new Promise((resolve, reject) => {
-					connection.query(sql.queryArticlesCount(filterContent), function (err, result) {
-						if (err) {
-							console.log(err)
-						} else {
-							resolve(result[0].total)
-						}
-					})
-				})
-			}
-			const pageSize = Number(req.query.pageSize)
-			const page = Number(req.query.page)
-			let index;
-			let queryRes;
-			if (pageSize <= 0 || page <= 0) {
-				queryRes = {
-					code: 1,
-					msg: "pageSize或page不能为0"
-				}
-			} else {
-				const total = await queryArticlesCount()
-				if (!total) {
-					queryRes = {
-						code: 1,
-						data: {
-							dataList: []
-						},
-						msg: "暂无数据",
-						total: total,
-					}
-				} else {
-					index = (page - 1) * pageSize < 0 ? 0 : (page - 1) * pageSize;
-					if (index > total && total) {
-						queryRes = {
-							code: 1,
-							msg: "已超出了总条数"
-						}
-					} else {
-						queryRes = await queryArticles()
-					}
-					queryRes.total = total
-				}
-			}
-			jsonWrite(res, queryRes)
-			connection.release()
-		})
-	}
+
 }

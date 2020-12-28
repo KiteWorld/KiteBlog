@@ -2,10 +2,11 @@ var mysql = require('mysql');
 var conf = require("../config/db")
 var sql = require("./userSqlMapping");
 const {
-	sqlFieldsFomatter,
+	queryParamsFilter,
 	timeFomatter,
 	curTime,
-	jsonWrite
+	jsonWrite,
+	turnPage
 } = require('../common/common');
 var pool = mysql.createPool(conf.mysql)
 
@@ -196,8 +197,16 @@ module.exports = {
 	queryAll: function (req, res, next) {
 		pool.getConnection(async function (err, connection) {
 			if (err) return
-			let filterContent = sqlFieldsFomatter(req.query, "u_", connection, ["name"], ["pageSize", "page"]);
-			let queryUser = () => {
+			let params = {
+				u_name: req.query.userName || null,
+				u_role: req.query.userRole || null,
+				u_status: req.query.userStatus || null,
+				u_sex: req.query.userSex || null,
+				u_createdate: req.query.createDate || null
+			}
+			let filterContent = queryParamsFilter(connection, params, ["u_name"], ["u_createdate"]);
+
+			let queryUser = (index, pageSize) => {
 				return new Promise((resolve, reject) => {
 					connection.query(sql.queryAll(filterContent), [index, pageSize], function (err, result) {
 						if (err) {
@@ -207,7 +216,7 @@ module.exports = {
 								code: 0,
 								data: {
 									dataList: result.map(x => {
-										x.createTime = timeFomatter(x.createTime)
+										x.createDate = timeFomatter(x.createDate)
 										return x
 									}),
 								},
@@ -228,39 +237,7 @@ module.exports = {
 					})
 				})
 			}
-			const pageSize = Number(req.query.pageSize)
-			const page = Number(req.query.page)
-			let index;
-			let queryRes;
-			if (pageSize <= 0 || page <= 0) {
-				queryRes = {
-					code: 1,
-					msg: "pageSize或page不能为0"
-				}
-			} else {
-				const total = await queryUserCount()
-				if (!total) {
-					queryRes = {
-						code: 1,
-						data: {
-							dataList: []
-						},
-						msg: "没有用户数据",
-						total: total,
-					}
-				} else {
-					index = (page - 1) * pageSize < 0 ? 0 : (page - 1) * pageSize;
-					if (index > total && total) {
-						queryRes = {
-							code: 1,
-							msg: "已超出了总条数"
-						}
-					} else {
-						queryRes = await queryUser()
-					}
-					queryRes.total = total
-				}
-			}
+			let queryRes = await turnPage(req, queryUserCount, queryUser)
 			jsonWrite(res, queryRes)
 			connection.release()
 		})
