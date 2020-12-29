@@ -5,7 +5,8 @@ const {
 	getFilterParams,
 	jsonWrite,
 	queryParamsFilter,
-	turnPage
+	turnPage,
+	transaction
 } = require('../common/common');
 const {
 	CATEGORY_TO_DB,
@@ -156,12 +157,12 @@ module.exports = {
 
 		})
 	},
-	queryAllCatsList: (req, res, next, categoryType) => {
+	queryCatsList: (req, res, next, isHotPointCat) => {
 		pool.getConnection(function (err, connection) {
 			if (err) {
 				return console.log(err)
 			}
-			connection.query(sql.queryAllCatsList, categoryType, (err, result) => {
+			connection.query(sql.queryCatsList, isHotPointCat ? "hotpoint" : "category", (err, result) => {
 				if (err) {
 					console.log(err)
 				} else {
@@ -178,12 +179,12 @@ module.exports = {
 			})
 		})
 	},
-	queryAllCats: (req, res, next) => {
+	queryCats: (req, res, next) => {
 		pool.getConnection(function (err, connection) {
 			if (err) {
 				return console.log(err)
 			}
-			connection.query(sql.queryAllCats, "category", (err, result) => {
+			connection.query(sql.queryCats, "category", (err, result) => {
 				let dataList = []
 				if (err) {
 					console.log("err1", err)
@@ -249,7 +250,7 @@ module.exports = {
 
 		})
 	},
-	queryAllHotPointCats: (req, res, next) => {
+	queryHotPointCats: (req, res, next) => {
 		pool.getConnection(async (err, connection) => {
 			if (err) {
 				return console.log(err)
@@ -258,9 +259,9 @@ module.exports = {
 				cat_name: req.query.categoryName
 			}
 			let filterContent = queryParamsFilter(connection, params, ["cat_name"])
-			let queryAllHotPointCats = (index, pageSize) => {
+			let queryHotPointCats = (index, pageSize) => {
 				return new Promise((resolve, reject) => {
-					connection.query(sql.queryAllHotPointCats(filterContent), "hotpoint", (err, result) => {
+					connection.query(sql.queryHotPointCats(filterContent), "hotpoint", (err, result) => {
 						if (err) {
 							console.log(err)
 						} else {
@@ -290,11 +291,35 @@ module.exports = {
 					})
 				})
 			}
-			let queryRes = await turnPage(req, queryCatsCount, queryAllHotPointCats)
+			let queryRes = await turnPage(req, queryCatsCount, queryHotPointCats)
 			jsonWrite(res, queryRes)
 			connection.release()
 
 		})
+	},
+	transferCate: (req, res, next, isHotPointCat) => {
+		let categoryId = req.body.categoryId
+		let afterCategoryId = req.body.afterCategoryId
+		let sqlParamsEntities = [{
+			sql: isHotPointCat ? sql.updateHotPointCateId : sql.updateArticleCateId,
+			params: [afterCategoryId, categoryId]
+		}, {
+			sql: isHotPointCat ? sql.updateHotPointCateRelId : sql.updateArticleCateRelId,
+			params: [afterCategoryId, categoryId]
+		}]
+		transaction(sqlParamsEntities, (err, info) => {
+			let result;
+			if (err) {
+				console.log(err)
+			} else {
+				console.log(info)
+				result = {
+					code: 0,
+					msg: '迁移成功'
+				};
+			}
+			jsonWrite(res, result);
+		}, "parallel")
 	},
 	//适用于一次性保存。如果类型很多建议改成把 增删改分开
 	save: function (req, res, next) {

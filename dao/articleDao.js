@@ -108,14 +108,14 @@ module.exports = {
 	updateArticleCat: (req, res, next) => {
 		let articleIds = req.body.articleIds
 		let categoryId = req.body.categoryId
-		let sqlparamsEntities = [{
+		let sqlParamsEntities = [{
 			sql: sql.updateArticleCat,
 			params: [categoryId, articleIds]
 		}, {
-			sql: sql.updateAryicleCatRel,
+			sql: sql.updateArticleCatRel,
 			params: [categoryId, articleIds]
 		}]
-		transaction(sqlparamsEntities, function (err, info) {
+		transaction(sqlParamsEntities, (err, info) => {
 			var result;
 			if (err) {
 				console.log(err)
@@ -194,8 +194,8 @@ module.exports = {
 	// 				resolve(result)
 	// 			})
 	// 		})
-	// 		let updateAryicleCatRel = new Promise((resolve, reject) => {
-	// 			connection.query(sql.updateAryicleCatRel + "1", [categoryId, articleIds], (err, result) => {
+	// 		let updateArticleCatRel = new Promise((resolve, reject) => {
+	// 			connection.query(sql.updateArticleCatRel + "1", [categoryId, articleIds], (err, result) => {
 	// 				if (err) {
 	// 					return connection.rollback(function () {
 	// 						throw err;
@@ -208,7 +208,7 @@ module.exports = {
 	// 			if (err) {
 	// 				{console.log(err)}else{
 	// 			}
-	// 			Promise.all([updateArticleCat, updateAryicleCatRel]).then((result) => {
+	// 			Promise.all([updateArticleCat, updateArticleCatRel]).then((result) => {
 	// 				console.log(result)
 	// 				result = {
 	// 					code: 0,

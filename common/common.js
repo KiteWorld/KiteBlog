@@ -136,19 +136,19 @@ let turnPage = async (req, getItemsCount, getItems) => {
 	return queryRes
 }
 //批量处理、多表数据同步处理的事务
-let transaction = function (sqlparamsEntities, callback, asyncMethod = "series") {
-	pool.getConnection(function (err, connection) {
+let transaction = (sqlparamsEntities, callback, asyncMethod = "series") => {
+	pool.getConnection((err, connection) => {
 		if (err) {
 			return callback(err, null);
 		}
-		connection.beginTransaction(function (err) {
+		connection.beginTransaction((err) => {
 			if (err) {
 				return callback(err, null);
 			}
 			var funcAry = [];
-			sqlparamsEntities.forEach(function (sqlItem) {
-				var temp = function (cb) {
-					connection.query(sqlItem.sql, sqlItem.params, function (tErr, rows, fields) {
+			sqlparamsEntities.forEach((sqlItem) => {
+				var temp = (cb) => {
+					connection.query(sqlItem.sql, sqlItem.params, (tErr, rows, fields) => {
 						if (tErr) {
 							return cb(tErr, null);
 						} else {
@@ -158,20 +158,20 @@ let transaction = function (sqlparamsEntities, callback, asyncMethod = "series")
 				};
 				funcAry.push(temp);
 			});
-			//asyncMethod 只支持 waterfall、series、parallel、auto这是个方法接收的参数是一致的。
-			async [asyncMethod](funcAry, function (error, result) {
+			//asyncMethod 只支持 waterfall、series、parallel、auto这些方法接收的参数是一致的。
+			async [asyncMethod](funcAry, (error, result) => {
 				if (error) {
-					connection.rollback(function (err) {
+					connection.rollback((err) => {
 						connection.release();
 						error = err || error //如果回滚错误，优先返回回滚错误
 						return callback(error, null);
 					});
 				} else {
 					//提交事务
-					connection.commit(function (err, info) {
+					connection.commit((err, info) => {
 						if (err) {
 							//报错回滚
-							connection.rollback(function (err) {
+							connection.rollback((err) => {
 								connection.release();
 								return callback(err, null);
 							});
