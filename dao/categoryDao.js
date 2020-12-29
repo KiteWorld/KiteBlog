@@ -15,8 +15,7 @@ const e = require('express');
 var pool = mysql.createPool(conf.mysql)
 
 module.exports = {
-
-	delCatById: (req, res, next) => {
+	delCatById: (req, res, next, isHotPointCat) => {
 		const categoryId = req.body.categoryId
 		if (!categoryId) return
 		pool.getConnection(async (err, connection) => {
@@ -25,14 +24,14 @@ module.exports = {
 			}
 			let queryCatArticleCount = () => {
 				return new Promise((resolve, reject) => {
-					connection.query(sql.queryCatArticleCount, categoryId, (err, result) => {
+					connection.query(isHotPointCat ? sql.queryCatHotPointCount : sql.queryCatArticleCount, categoryId, (err, result) => {
 						if (err) {
 							console.log(err)
 						} else {
-							if (result[0].articleCount) {
+							if (result[0].articleCount || result[0].hotPointCount) {
 								resolve({
 									code: 1,
-									msg: "该分类下存在文章，请先迁移文章到其他分类再删除!"
+									msg: `该分类下存在${isHotPointCat?"沸点":"文章"}，请先迁移至其他分类再删除!`
 								})
 							} else {
 								resolve(null)
@@ -77,7 +76,7 @@ module.exports = {
 				})
 			}
 			let result = await queryCatArticleCount()
-			if (!result) result = await queryChildrenCount()
+			if (!result && !isHotPointCat) result = await queryChildrenCount()
 			if (!result) result = await delCatById()
 			jsonWrite(res, result)
 			connection.release()
@@ -85,13 +84,14 @@ module.exports = {
 
 	},
 	insertCats: (req, res, next, isHotPointCat) => {
+		console.log(isHotPointCat)
 		pool.getConnection((err, connection) => {
 			if (err) {
 				return console.log(err)
 			}
 			if (!req.body.insertCats || !req.body.insertCats instanceof Array) return
 			let valuesList = req.body.insertCats.map(x => {
-				let values = [x.categoryName, isHotPointCat ? 0 : params.categoryParentId, , x.categoryStatus, x.categoryOrder, isHotPointCat ? 'hotpoint' : x.categoryLevel, x.description]
+				let values = [x.categoryName, isHotPointCat ? 0 : x.categoryParentId, x.categoryStatus, x.categoryOrder, isHotPointCat ? 'hotpoint' : 'category', x.categoryLevel || 1, x.description]
 				return values
 			})
 			//批量添加，valuesList为数组，数组的每一项也数组（values），就是需要添加的单条数据。传值给query()时，valuesList还需要放在数组里面 [valuesList]

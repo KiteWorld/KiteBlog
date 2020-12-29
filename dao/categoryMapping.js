@@ -1,3 +1,7 @@
+const {
+	update
+} = require("./userSqlMapping")
+
 let sql = {
 
 	getCatIds: "select cat_id as catorgreyId from k_category",
@@ -10,12 +14,14 @@ let sql = {
 	queryAllCatsList: "SELECT cat_name as categoryName,cat_id as categoryId,cat_level as categoryLevel FROM k_category WHERE cat.cat_type = ? ORDER BY cat_level",
 	queryCatsCount: "select count(*) as total from k_category where cat_type = ?",
 	queryCatArticleCount: "select count(*) as articleCount from k_article_category_relationship where cat_id = ?",
+	queryCatHotPointCount: "select count(*) as hotPointCount from k_hp_category_relationship where cat_id = ?",
 	delCatById: `delete from k_category where cat_id = ?`,
 	//支持单条、多条数据插入
-	insertCats: `insert into k_category (cat_name,cat_parentid,cat_status,cat_order,cat_level,cat_description) VALUES ?`,
+	insertCats: `insert into k_category (cat_name,cat_parentid,cat_status,cat_order,cat_type,cat_level,cat_description) VALUES ?`,
 	updateCatById: `update k_category set cat_name=?,cat_status=?,cat_order=?,cat_description=? where cat_id = ?`,
 	queryChildrenCount: `select count(*) as childrenCount from k_category where cat_parentid = ?`,
 	updateCategoryOrder: `update k_category set cat_order=? where cat_id = ?`
+
 }
 
 module.exports = sql

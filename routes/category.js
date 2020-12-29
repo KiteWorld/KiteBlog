@@ -18,6 +18,9 @@ router.get('/getHotPointCategoriesList', function (req, res, next) {
 router.post('/deleteCategory', function (req, res, next) {
 	categoryDao.delCatById(req, res, next)
 });
+router.post('/deleteHotPointCategory', function (req, res, next) {
+	categoryDao.delCatById(req, res, next, true)
+});
 router.post('/insertCategories', function (req, res, next) {
 	categoryDao.insertCats(req, res, next)
 });
