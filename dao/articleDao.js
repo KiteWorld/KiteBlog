@@ -10,7 +10,7 @@ const {
 	turnPage
 } = require("../common/common");
 const {
-	ARTICLE_TYEP
+	ARTICLE_HOTPOINT_TYEP
 } = require("../common/enumerate")
 module.exports = {
 	addAticle: (req, res, next) => {
@@ -84,7 +84,7 @@ module.exports = {
 	//修改文章类型（热门、置顶、推荐、普通）
 	updateArticleType: (req, res, next) => {
 		let articleIds = req.body.articleIds
-		let articleType = Object.keys(ARTICLE_TYEP).includes(req.body.articleType) ? req.body.articleType : null
+		let articleType = Object.keys(ARTICLE_HOTPOINT_TYEP).includes(req.body.articleType) ? req.body.articleType : null
 		if (!articleIds || articleIds.length == 0) return
 		pool.getConnection((err, connection) => {
 			if (err) {
