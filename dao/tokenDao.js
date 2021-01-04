@@ -35,6 +35,7 @@ module.exports = {
 										}),
 										name: userObj.a_name,
 										role: userObj.a_role,
+										userId: userObj.u_id,
 									}
 								}
 							}

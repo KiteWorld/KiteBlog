@@ -6,6 +6,8 @@ let sql = {
 	updateHotPointType: "update k_hot_point set hp_type=? where hp_id in (?)",
 	updateHotPointStatus: "update k_hot_point set hp_status=? where hp_id in (?)",
 	deleteHotPoint: "delete from k_hot_point where hp_id in (?)",
-	insertHotPoint: "insert into k_hot_point ?"
+	insertHotPoint: "insert into k_hot_point ?",
+	insertHotPointCatRel: "insert into k_article_category_relationship (u_id,cat_id) values(?,?)",
+
 }
 module.exports = sql

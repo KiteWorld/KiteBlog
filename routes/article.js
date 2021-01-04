@@ -5,6 +5,12 @@ let articleDao = require('../dao/articleDao')
 router.get('/queryArticles', (res, req, next) => {
 	articleDao.queryArticles(res, req, next)
 })
+router.get('/queryArticleById', (res, req, next) => {
+	articleDao.queryArticleById(res, req, next)
+})
+router.post('/saveArticle', (res, req, next) => {
+	articleDao.saveArticle(res, req, next)
+})
 router.post('/deleteArticle', (res, req, next) => {
 	articleDao.deleteArticle(res, req, next)
 })

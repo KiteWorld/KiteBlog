@@ -1,10 +1,12 @@
 let mysql = require("mysql")
 let conf = require("../config/db")
 let pool = mysql.createPool(conf.mysql)
+let async = require('async');
 let sql = require("./articleSqlMapping");
 const {
 	jsonWrite,
 	timeFomatter,
+	curTime,
 	queryParamsFilter,
 	transaction,
 	turnPage
@@ -13,12 +15,79 @@ const {
 	ARTICLE_HOTPOINT_TYEP
 } = require("../common/enumerate")
 module.exports = {
-	addAticle: (req, res, next) => {
+	saveArticle: (req, res, next) => {
 		pool.getConnection((err, connection) => {
-			if (err) return
-			let param = req.body;
-			connection.query(sql.addArticle)
-		})
+			if (err) return console.log(err)
+			connection.beginTransaction((err) => {
+				if (err) return console.log(err)
+				const saveParams = [
+					req.body.title,
+					req.body.content,
+					req.body.markdown,
+					req.body.articleType || 'top',
+					req.body.userId,
+					req.body.categoryId,
+					req.body.updateDate || curTime(),
+					req.body.createDate || curTime(),
+				];
+				const addRelParams = [null, req.body.categoryId];
+				const saveArticle = (cb) => {
+					connection.query(req.body.articleId ? sql.updateArticle : sql.insertArticle, saveParams, (err, result, fields) => {
+						if (err) {
+							return cb(err, null);
+						} else {
+							result = req.body.articleId ? req.body.articleId : result.insertId
+							return cb(null, result);
+						}
+					})
+				}
+				const addArticleCatRel = (articleId, cb) => {
+					addRelParams[0] = articleId
+					connection.query(sql.insertArticleCatRel, addRelParams, (err, result, fields) => {
+						if (err) {
+							return cb(err, null);
+						} else {
+							return cb(null, result);
+						}
+					})
+				}
+				if (req.body.articleId) {
+					saveParams.pop()
+					saveParams.push(req.body.articleId)
+					funcAry = [saveArticle];
+				} else {
+					funcAry = [saveArticle, addArticleCatRel];
+				}
+				async.waterfall(funcAry, (error, articleId) => {
+					if (error) {
+						connection.rollback((err) => {
+							connection.release();
+							error = err || error
+							jsonWrite(res, null)
+						});
+					} else {
+						connection.commit((err, result) => {
+							if (err) {
+								connection.rollback((err) => {
+									connection.release();
+									console.log(err)
+								});
+							} else {
+								connection.release();
+								result = {
+									code: 0,
+									data: {
+										articleId: articleId
+									},
+									msg: '添加成功'
+								}
+								jsonWrite(res, result)
+							}
+						})
+					}
+				})
+			});
+		});
 	},
 	//删除
 	deleteArticle: (req, res, next) => {
@@ -126,6 +195,32 @@ module.exports = {
 				};
 			}
 			jsonWrite(res, result);
+		})
+	},
+	queryArticleById: (req, res, next) => {
+		const articleId = req.query.articleId
+		pool.getConnection((err, connection) => {
+			if (err) {
+				console.log(err)
+			}
+			connection.query(sql.queryArticleById, [articleId], (err, result) => {
+				if (err) {
+					console.log(err)
+				} else {
+					console.log(result)
+					result[0].createDate = timeFomatter(result[0].createDate)
+					result[0].updateDate = timeFomatter(result[0].updateDate)
+					result = {
+						code: 0,
+						data: {
+							...result[0]
+						},
+						msg: "查询成功"
+					}
+				}
+				jsonWrite(res, result)
+				connection.release()
+			})
 		})
 	},
 	//查询文章（支持标题、创建人、状态、分类、时间段等搜索）
