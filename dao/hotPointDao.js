@@ -1,4 +1,5 @@
 let mysql = require("mysql")
+let async = require("async")
 let conf = require("../config/db")
 let pool = mysql.createPool(conf.mysql)
 let sql = require("./hotPointMapping");
@@ -7,7 +8,8 @@ const {
 	timeFomatter,
 	queryParamsFilter,
 	transaction,
-	turnPage
+	turnPage,
+	curTime
 } = require("../common/common");
 const {
 	ARTICLE_HOTPOINT_TYEP,
@@ -62,6 +64,32 @@ module.exports = {
 			let queryRes = await turnPage(req, queryHotPointCount, queryHotPoint)
 			jsonWrite(res, queryRes)
 			connection.release()
+		})
+	},
+	queryHotPointById: (req, res, next) => {
+		const hotPointId = req.query.hotPointId
+		pool.getConnection((err, connection) => {
+			if (err) {
+				console.log(err)
+			}
+			connection.query(sql.queryHotPointById, [hotPointId], (err, result) => {
+				if (err) {
+					console.log(err)
+				} else {
+					if (result.length > 0) {
+						result[0].createDate = timeFomatter(result[0].createDate)
+						result = {
+							code: 0,
+							data: {
+								...result[0]
+							},
+							msg: "查询成功"
+						}
+					}
+				}
+				jsonWrite(res, result)
+				connection.release()
+			})
 		})
 	},
 	//修改沸点所属分类
@@ -174,5 +202,80 @@ module.exports = {
 				connection.release()
 			})
 		})
+	},
+	saveHotPoint: (req, res, next) => {
+		pool.getConnection((err, connection) => {
+			if (err) return console.log(err)
+			connection.beginTransaction((err) => {
+				if (err) return console.log(err)
+				const saveParams = [
+					req.body.content,
+					req.body.pictrue || null,
+					req.body.createDate || curTime(),
+					req.body.hotPointType || 'top',
+					req.body.userId,
+					req.body.categoryId,
+				];
+				const addRelParams = [null, req.body.categoryId];
+				const saveHotPoint = (cb) => {
+					connection.query(req.body.hotPointId ? sql.updateHotPoint : sql.insertHotPoint, saveParams, (err, result, fields) => {
+						if (err) {
+
+							console.log(err)
+							return cb(err, null);
+						} else {
+							result = req.body.hotPointId ? req.body.hotPointId : result.insertId
+							return cb(null, result);
+						}
+					})
+				}
+				const addHotPointCatRel = (hotPointId, cb) => {
+					addRelParams[0] = hotPointId
+					connection.query(sql.insertHotPointCatRel, addRelParams, (err, result, fields) => {
+						if (err) {
+							console.log(err)
+							return cb(err, null);
+						} else {
+							return cb(null, hotPointId);
+						}
+					})
+				}
+				if (req.body.hotPointId) {
+					saveParams.push(req.body.hotPointId)
+					funcAry = [saveHotPoint];
+				} else {
+					funcAry = [saveHotPoint, addHotPointCatRel];
+				}
+				async.waterfall(funcAry, (error, hotPointId) => {
+					if (error) {
+						connection.rollback((err) => {
+							connection.release();
+							error = err || error
+							jsonWrite(res, null)
+						});
+					} else {
+						connection.commit((err, result) => {
+							if (err) {
+								connection.rollback((err) => {
+									connection.release();
+									console.log(err)
+								});
+							} else {
+								console.log(result)
+								result = {
+									code: 0,
+									data: {
+										hotPointId: hotPointId
+									},
+									msg: '保存成功'
+								}
+								connection.release();
+								jsonWrite(res, result)
+							}
+						})
+					}
+				})
+			});
+		});
 	},
 }

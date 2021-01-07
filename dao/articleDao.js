@@ -47,7 +47,7 @@ module.exports = {
 						if (err) {
 							return cb(err, null);
 						} else {
-							return cb(null, result);
+							return cb(null, articleId);
 						}
 					})
 				}
@@ -79,7 +79,7 @@ module.exports = {
 									data: {
 										articleId: articleId
 									},
-									msg: '添加成功'
+									msg: '保存成功'
 								}
 								jsonWrite(res, result)
 							}
@@ -207,7 +207,6 @@ module.exports = {
 				if (err) {
 					console.log(err)
 				} else {
-					console.log(result)
 					result[0].createDate = timeFomatter(result[0].createDate)
 					result[0].updateDate = timeFomatter(result[0].updateDate)
 					result = {
