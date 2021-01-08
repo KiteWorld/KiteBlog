@@ -209,10 +209,11 @@ module.exports = {
 			connection.beginTransaction((err) => {
 				if (err) return console.log(err)
 				const saveParams = [
-					req.body.content,
-					req.body.pictrue || null,
+					req.body.hotPointContent,
+					req.body.hotPointPictrues || null,
 					req.body.createDate || curTime(),
-					req.body.hotPointType || 'top',
+					req.body.hotPointType || 'normal',
+					req.body.hotPointStatus || 'normal',
 					req.body.userId,
 					req.body.categoryId,
 				];

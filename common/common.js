@@ -158,7 +158,7 @@ let transaction = (sqlparamsEntities, callback, asyncMethod = "series") => {
 				};
 				funcAry.push(temp);
 			});
-			//asyncMethod 只支持 parallel、series 这些方法接收的参数是一致的。
+			//asyncMethod 只支持 parallel、series 这些方法接收的参数是一致，不传转递数据的 async模块方法 
 			async [asyncMethod](funcAry, (error, result) => {
 				if (error) {
 					connection.rollback((err) => {

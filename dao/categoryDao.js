@@ -32,7 +32,7 @@ module.exports = {
 							if (result[0].articleCount || result[0].hotPointCount) {
 								resolve({
 									code: 1,
-									msg: `该分类下存在${isHotPointCat?"沸点":"文章"}，请先迁移至其他分类再删除!`
+									msg: `该分类下存在数据，请先迁移至其他分类再删除!`
 								})
 							} else {
 								resolve(null)
@@ -84,15 +84,14 @@ module.exports = {
 		})
 
 	},
-	insertCats: (req, res, next, isHotPointCat) => {
-		console.log(isHotPointCat)
+	insertCats: (req, res, next, type) => {
 		pool.getConnection((err, connection) => {
 			if (err) {
 				return console.log(err)
 			}
 			if (!req.body.insertCats || !req.body.insertCats instanceof Array) return
 			let valuesList = req.body.insertCats.map(x => {
-				let values = [x.categoryName, isHotPointCat ? 0 : x.categoryParentId, x.categoryStatus, x.categoryOrder, isHotPointCat ? 'hotpoint' : 'category', x.categoryLevel || 1, x.description]
+				let values = [x.categoryName, type !== "article" ? 0 : x.categoryParentId, x.categoryStatus, x.categoryOrder, type, x.categoryLevel || 1, x.description || null]
 				return values
 			})
 			//批量添加，valuesList为数组，数组的每一项也数组（values），就是需要添加的单条数据。传值给query()时，valuesList还需要放在数组里面 [valuesList]
@@ -120,7 +119,7 @@ module.exports = {
 				return console.log(err)
 			}
 			let params = req.body;
-			let values = [params.categoryName, params.categoryStatus, params.categoryOrder, params.description, params.categoryId]
+			let values = [params.categoryName, params.categoryStatus, params.categoryOrder, params.description || null, params.categoryId]
 			connection.query(sql.updateCatById, values, (err, result) => {
 				if (err) {
 					console.log(err)
@@ -141,7 +140,6 @@ module.exports = {
 			if (err) {
 				return console.log(err)
 			}
-			//get方法url，传boolean值，传的是字符串。
 			connection.query(sql.updateCategoryOrder, [req.query.categoryOrder, req.query.categoryId], (err, result) => {
 				if (err) {
 					console.log(err)
@@ -157,12 +155,12 @@ module.exports = {
 
 		})
 	},
-	queryCatsList: (req, res, next, isHotPointCat) => {
+	queryCatsList: (req, res, next) => {
 		pool.getConnection(function (err, connection) {
 			if (err) {
 				return console.log(err)
 			}
-			connection.query(sql.queryCatsList, isHotPointCat ? "hotpoint" : "category", (err, result) => {
+			connection.query(sql.queryCatsList, req.query.categoryType, (err, result) => {
 				if (err) {
 					console.log(err)
 				} else {
@@ -184,7 +182,7 @@ module.exports = {
 			if (err) {
 				return console.log(err)
 			}
-			connection.query(sql.queryCats, "category", (err, result) => {
+			connection.query(sql.queryCats, "article", (err, result) => {
 				let dataList = []
 				if (err) {
 					console.log("err1", err)
@@ -261,7 +259,7 @@ module.exports = {
 			let filterContent = queryParamsFilter(connection, params, ["cat_name"])
 			let queryHotPointCats = (index, pageSize) => {
 				return new Promise((resolve, reject) => {
-					connection.query(sql.queryHotPointCats(filterContent), "hotpoint", (err, result) => {
+					connection.query(sql.queryHotPointCats(filterContent), (err, result) => {
 						if (err) {
 							console.log(err)
 						} else {
@@ -292,6 +290,53 @@ module.exports = {
 				})
 			}
 			let queryRes = await turnPage(req, queryCatsCount, queryHotPointCats)
+			jsonWrite(res, queryRes)
+			connection.release()
+
+		})
+	},
+	queryTemplateCats: (req, res, next) => {
+		pool.getConnection(async (err, connection) => {
+			if (err) {
+				return console.log(err)
+			}
+			let params = {
+				cat_name: req.query.categoryName
+			}
+			let filterContent = queryParamsFilter(connection, params, ["cat_name"])
+			let queryTemplateCats = (index, pageSize) => {
+				return new Promise((resolve, reject) => {
+					connection.query(sql.queryTemplateCats(filterContent), (err, result) => {
+						if (err) {
+							console.log(err)
+						} else {
+							resolve({
+								code: 0,
+								data: {
+									dataList: result.map(x => {
+										x.categoryStatus = Boolean(x.categoryStatus)
+										return x
+									})
+								},
+								msg: "查询成功",
+								total: 0
+							})
+						}
+					})
+				})
+			}
+			let queryCatsCount = () => {
+				return new Promise((resolve, reject) => {
+					connection.query(sql.queryCatsCount, "template", (err, result) => {
+						if (err) {
+							console.log(err)
+						} else {
+							resolve(result[0].total)
+						}
+					})
+				})
+			}
+			let queryRes = await turnPage(req, queryCatsCount, queryTemplateCats)
 			jsonWrite(res, queryRes)
 			connection.release()
 
