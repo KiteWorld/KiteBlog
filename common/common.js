@@ -186,6 +186,24 @@ let transaction = (sqlparamsEntities, callback, asyncMethod = "series") => {
 	});
 };
 
+let routerItemFormatter = (item) => {
+	const routerItem = {
+		path: item.path,
+		component: item.component,
+		name: item.name,
+		children: [],
+		meta: {
+			title: item.title,
+			isAffix: Boolean(item.isAffix),
+			noCache: Boolean(item.noCache),
+			icon: item.icon,
+			roles: item.roles.split(",") || [item.roles],
+			level: item.routerLevel
+		},
+	}
+	if (item.redirect) routerItem.redirect = item.redirect
+	return routerItem
+}
 module.exports = {
 	jsonWrite,
 	curTime,
@@ -196,5 +214,6 @@ module.exports = {
 	fieldsToValues,
 	transaction,
 	queryParamsFilter,
-	turnPage
+	turnPage,
+	routerItemFormatter
 }

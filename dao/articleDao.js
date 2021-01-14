@@ -24,7 +24,7 @@ module.exports = {
 					req.body.title,
 					req.body.content,
 					req.body.markdown,
-					req.body.articleType || 'top',
+					req.body.type || 'normal',
 					req.body.userId,
 					req.body.categoryId,
 					req.body.updateDate || curTime(),
@@ -223,7 +223,7 @@ module.exports = {
 		})
 	},
 	//查询文章（支持标题、创建人、状态、分类、时间段等搜索）
-	queryArticles: (req, res, next) => {
+	queryArticles: (req, res, next, isTemplate) => {
 		pool.getConnection(async (err, connection) => {
 			if (err) return
 			let params = {
@@ -233,6 +233,7 @@ module.exports = {
 				a_updatedate: req.query.updateDate,
 				"c.cat_id": req.query.categoryId,
 				u_name: req.query.userName,
+				cat_type: isTemplate ? "template" : "article"
 			}
 			let filterContent = queryParamsFilter(connection, params, ["a_title", "u_name"], ["a_createdate", "a_updatedate"])
 			let queryArticles = (index, pageSize) => {

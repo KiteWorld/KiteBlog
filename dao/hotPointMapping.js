@@ -8,7 +8,7 @@ let sql = {
 	updateHotPointStatus: "update k_hot_point set hp_status=? where hp_id in (?)",
 	updateHotPoint: "UPDATE k_hot_point SET hp_content = ?, hp_pictrue = ?, hp_createdate = ?, hp_type = ?, hp_status = ? , u_id = ?, cat_id = ? WHERE hp_id = ?",
 	deleteHotPoint: "delete from k_hot_point where hp_id in (?)",
-	insertHotPoint: "insert into k_hot_point (hp_content,hp_pictrue,hp_createdate,hp_type,hp_status,u_id,cat_id) values(?,?,?,?,?,?)",
+	insertHotPoint: "insert into k_hot_point (hp_content,hp_pictrue,hp_createdate,hp_type,hp_status,u_id,cat_id) values(?,?,?,?,?,?,?)",
 	insertHotPointCatRel: "insert into k_hp_category_relationship (hp_id,cat_id) values(?,?)",
 
 }

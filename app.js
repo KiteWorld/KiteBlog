@@ -13,6 +13,7 @@ var loginRouter = require('./routes/login');
 var categoryRouter = require('./routes/category');
 var articleRouter = require('./routes/article');
 var hotPointRouter = require('./routes/hotPoint');
+var viewRouter = require('./routes/router');
 const {
   jsonWrite
 } = require('./common/common');
@@ -64,6 +65,7 @@ app.use('/auth', loginRouter);
 app.use('/category', categoryRouter);
 app.use('/article', articleRouter);
 app.use('/hotPoint', hotPointRouter);
+app.use('/router', viewRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

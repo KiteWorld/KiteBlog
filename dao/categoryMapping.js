@@ -1,7 +1,3 @@
-const {
-	update
-} = require("./userSqlMapping")
-
 let sql = {
 
 	getCatIds: "select cat_id as catorgreyId from k_category",
@@ -12,7 +8,7 @@ let sql = {
 	queryCats: "SELECT cat.cat_status as categoryStatus,cat.cat_name as categoryName,cat.cat_parentid as categoryParentId,cat.cat_level as categoryLevel,cat.cat_type as categoryType,cat.cat_description as description,cat.cat_id as categoryId,cat.cat_order as categoryOrder,IFNULL(catecount.articleCount,0) articleCount FROM(SELECT COUNT(rel.cat_id) as articleCount,cat_id FROM k_article_category_relationship as rel GROUP BY(rel.cat_id)) catecount RIGHT JOIN k_category as cat ON cat.cat_id = catecount.cat_id WHERE cat.cat_type = ? ORDER BY cat_level,categoryOrder",
 	queryHotPointCats: (filterContent) => `SELECT cat.cat_status as categoryStatus,cat.cat_name as categoryName,cat.cat_parentid as categoryParentId,cat.cat_level as categoryLevel,cat.cat_type as categoryType,cat.cat_description as description,cat.cat_id as categoryId,cat.cat_order as categoryOrder,IFNULL(catecount.hotPointCount,0) hotPointCount FROM(SELECT COUNT(rel.cat_id) as hotPointCount,cat_id FROM k_hp_category_relationship as rel GROUP BY(rel.cat_id)) catecount RIGHT JOIN k_category as cat ON cat.cat_id = catecount.cat_id WHERE cat.cat_type = 'hotpoint' and ${filterContent} ORDER BY cat_level,categoryOrder`,
 	queryTemplateCats: (filterContent) => `SELECT cat.cat_status as categoryStatus,cat.cat_name as categoryName,cat.cat_parentid as categoryParentId,cat.cat_level as categoryLevel,cat.cat_type as categoryType,cat.cat_description as description,cat.cat_id as categoryId,cat.cat_order as categoryOrder,IFNULL(catecount.templateCount,0) templateCount FROM(SELECT COUNT(rel.cat_id) as templateCount,cat_id FROM k_article_category_relationship as rel GROUP BY(rel.cat_id)) catecount RIGHT JOIN k_category as cat ON cat.cat_id = catecount.cat_id WHERE cat.cat_type = 'template' and ${filterContent} ORDER BY cat_level,categoryOrder`,
-	
+
 	queryCatsList: "SELECT cat_name as categoryName,cat_id as categoryId,cat_level as categoryLevel FROM k_category WHERE cat_type = ? ORDER BY cat_level",
 	queryCatsCount: "select count(*) as total from k_category where cat_type = ?",
 	queryCatArticleCount: "select count(*) as articleCount from k_article_category_relationship where cat_id = ?",

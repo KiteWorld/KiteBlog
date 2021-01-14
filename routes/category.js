@@ -15,9 +15,6 @@ router.get('/getTemplateCategories', function (req, res, next) {
 router.get('/getCategoriesList', function (req, res, next) {
 	categoryDao.queryCatsList(req, res, next)
 });
-// router.get('/getHotPointCategoriesList', function (req, res, next) {
-// 	categoryDao.queryCatsList(req, res, next, true)
-// });
 router.post('/deleteCategory', function (req, res, next) {
 	categoryDao.delCatById(req, res, next)
 });

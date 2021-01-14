@@ -5,6 +5,9 @@ let articleDao = require('../dao/articleDao')
 router.get('/queryArticles', (res, req, next) => {
 	articleDao.queryArticles(res, req, next)
 })
+router.get('/queryTemplate', (res, req, next) => {
+	articleDao.queryArticles(res, req, next, true)
+})
 router.get('/queryArticleById', (res, req, next) => {
 	articleDao.queryArticleById(res, req, next)
 })

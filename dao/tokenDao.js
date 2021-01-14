@@ -15,7 +15,7 @@ module.exports = {
 				return
 			}
 			let param = req.body
-			let sqlType = role === 'admin' ? sql.adminLogin : sql.login;
+			let sqlType = role === 'CMS' ? sql.adminLogin : sql.login;
 			connection.query(sqlType, [param.name, param.password], function (err, result) {
 				let ret;
 				if (err) {
@@ -24,12 +24,13 @@ module.exports = {
 					if (result.length > 0) {
 						let userObj = result[0]
 						if (userObj.a_password === param.password || userObj.u_password === param.password) {
-							if (role === "admin") {
+							if (role === "CMS") {
 								ret = {
 									code: 0,
 									data: {
 										token: jsonWebToken.sign({
-											userId: userObj.a_id
+											userId: userObj.a_id,
+											role: userObj.a_role,
 										}, ENU.SECRET_KEY, {
 											expiresIn: "24h",
 										}),
