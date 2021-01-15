@@ -16,11 +16,11 @@ module.exports = {
 	queryRouter: (req, res, next) => {
 		pool.getConnection(async (err, connection) => {
 			if (err) return
-			console.log(req.user.role)
-			connection.query(sql.queryRouter, `%${req.user.role}%`, (err, result) => {
+			//req.user对象 是token解析出来的用户信息
+			connection.query(sql.queryRouter, req.user.role, (err, result) => {
 				let dataList = []
 				if (err) {
-					console.log("err1", err)
+					console.log(err)
 				} else {
 					let levelObj = {}
 					result.forEach(x => {
