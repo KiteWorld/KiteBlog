@@ -11,6 +11,7 @@ const {
 var pool = mysql.createPool(conf.mysql)
 
 module.exports = {
+	//这里主要是为了学习才使用 async...await...，实际项目中推荐使用 async模块来完成
 	add: function (req, res, next) {
 		pool.getConnection(async function (err, connection) {
 			if (err) {

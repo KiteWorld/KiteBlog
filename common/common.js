@@ -1,7 +1,9 @@
-var async = require('async');
-let mysql = require("mysql")
-let conf = require("../config/db")
-let pool = mysql.createPool(conf.mysql)
+const async = require('async');
+const mysql = require("mysql")
+const conf = require("../config/db")
+const pool = mysql.createPool(conf.mysql)
+const path = require("path");
+const multer = require('multer')
 
 let jsonWrite = function (res, ret) {
 	if (typeof ret === "undefined" || ret === null) {
@@ -17,6 +19,7 @@ let curTime = function () {
 	let date = new Date()
 	return timeFomatter(date)
 }
+
 
 let timeFomatter = function (time) {
 	return time.getFullYear() + "-" +
@@ -204,6 +207,88 @@ let routerItemFormatter = (item) => {
 	if (item.redirect) routerItem.redirect = item.redirect
 	return routerItem
 }
+
+let upload = (req, res, next) => {
+	let filename = "";
+	let fullPath = path.resolve(__dirname, "../public/uploads");
+	let storage = multer.diskStorage({
+		//设置存储路径
+		destination: (req, file, cb) => {
+			cb(null, 'public/uploads');
+		},
+		//设置存储的文件名
+		filename: (req, file, cb) => {
+			//获取文件的扩展名
+			let extname = path.extname(file.originalname);
+			filename = file.fieldname + "-" + Date.now() + extname;
+			cb(null, filename);
+		}
+	})
+	let upload = multer({
+		storage: storage
+	}).single("file");
+	/* single属性名需和上传的name一致否则报错：multererr:MulterError: */
+	upload(req, res, (err) => {
+		/* 文件存入 */
+		if (err instanceof multer.MulterError) {
+			res.send("multererr:" + err);
+			console.log("multererr:" + err);
+			return false;
+		} else if (err) {
+			res.send("err:" + err);
+			return false;
+		} else {
+			next();
+		}
+	})
+
+}
+// let upload = (req, uploadPath, props = {
+// 	type: "single",
+// 	fileName: "file"
+// }, ) => {
+// 	let storage = multer.diskStorage({
+// 		destination: (req, file, cb) => {
+// 			cb(null, 'uploads/' + uploadPath);
+// 		},
+// 		filename: (req, file, cb) => {
+// 			let extname = path.extname(file.originalname);
+// 			let filename = file.fieldname + "-" + Date.now() + extname;
+// 			cb(null, filename);
+// 		}
+// 	})
+// 	let uploadObj = multer({
+// 		storage: storage
+// 	}).single(props.fileName)
+// 	// if (props.type === "single") {
+// 	// 	upload = upload[props.type](props.fileName);
+// 	// }
+// 	// if (props.type === "array") {
+// 	// 	upload = upload[props.type](props.fileName, props.maxCount);
+// 	// }
+// 	// if (props.type === "fields") {
+// 	// 	upload = upload[props.type](props.fileName);
+// 	// }
+
+// 	//.none() .any 不会用到，就不做处理
+
+// 	let file = null
+// 	uploadObj(req, res, (err) => {
+// 		if (err instanceof multer.MulterError) {
+// 			console.log("multererr:" + err);
+// 			return file;
+// 		} else if (err) {
+// 			return file;
+// 		} else {
+// 			console.log(req.file);
+// 			file = res.file
+// 		}
+// 	})
+// 	return file
+
+// }
+
+
 module.exports = {
 	jsonWrite,
 	curTime,
@@ -215,5 +300,6 @@ module.exports = {
 	transaction,
 	queryParamsFilter,
 	turnPage,
-	routerItemFormatter
+	routerItemFormatter,
+	upload
 }
