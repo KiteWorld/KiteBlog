@@ -8,14 +8,14 @@ var pool = mysql.createPool(conf.mysql)
 
 
 module.exports = {
-	getToken: function (role, req, res, next) {
+	getToken: function (type, req, res, next) {
 		pool.getConnection(function (err, connection) {
 			if (err) {
 				console.log(err)
 				return
 			}
 			let param = req.body
-			let sqlType = role === 'CMS' ? sql.adminLogin : sql.login;
+			let sqlType = type === 'CMS' ? sql.adminLogin : sql.login;
 			connection.query(sqlType, [param.name, param.password], function (err, result) {
 				let ret;
 				if (err) {
@@ -23,21 +23,20 @@ module.exports = {
 				} else {
 					if (result.length > 0) {
 						let userObj = result[0]
-						if (userObj.a_password === param.password || userObj.u_password === param.password) {
-							if (role === "CMS") {
-								ret = {
-									code: 0,
-									data: {
-										token: jsonWebToken.sign({
-											userId: userObj.a_id,
-											role: userObj.a_role,
-										}, ENU.SECRET_KEY, {
-											expiresIn: "24h",
-										}),
-										name: userObj.a_name,
-										role: userObj.a_role,
-										userId: userObj.u_id,
-									}
+						if (type === "CMS") {
+							ret = {
+								code: 0,
+								data: {
+									token: jsonWebToken.sign({
+										CMSUserId: userObj.CMSUserId,
+										role: userObj.role,
+									}, ENU.SECRET_KEY, {
+										expiresIn: "24h", //token有效期
+									}),
+									name: userObj.name,
+									role: userObj.role,
+									userId: userObj.userId,
+									CMSUserId: userObj.CMSUserId
 								}
 							}
 						} else {
@@ -45,13 +44,14 @@ module.exports = {
 								code: 0,
 								data: {
 									token: jsonWebToken.sign({
-										userId: userObj.u_id,
+										userId: userObj.userId,
+										role: userObj.role,
 									}, ENU.SECRET_KEY, {
-										expiresIn: 60 * 60 * 24 * 7,
+										expiresIn: 60 * 60 * 24 * 7, // 两种写法
 									}),
-									userId: userObj.u_id,
-									name: userObj.u_name,
-									iconPath: userObj.u_icon,
+									name: userObj.name,
+									role: userObj.role,
+									userId: userObj.userId,
 								}
 							}
 						}

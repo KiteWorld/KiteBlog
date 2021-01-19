@@ -1,13 +1,9 @@
 let mysql = require("mysql")
-let async = require("async")
 let conf = require("../config/db")
 let pool = mysql.createPool(conf.mysql)
 let sql = require("./routerMapping");
 const {
 	jsonWrite,
-	timeFomatter,
-	turnPage,
-	curTime,
 	routerItemFormatter
 } = require("../common/common");
 
