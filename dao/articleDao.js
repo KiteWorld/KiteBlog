@@ -26,6 +26,7 @@ module.exports = {
 					req.body.markdown,
 					req.body.type || 'normal',
 					req.body.userId,
+					req.body.modifierId || null,
 					req.body.categoryId,
 					req.body.updateDate || curTime(),
 					req.body.createDate || curTime(),
@@ -234,6 +235,7 @@ module.exports = {
 				"c.cat_id": req.query.categoryId,
 				u_name: req.query.userName,
 				cat_type: isTemplate ? "template" : "article"
+
 			}
 			let filterContent = queryParamsFilter(connection, params, ["a_title", "u_name"], ["a_createdate", "a_updatedate"])
 			let queryArticles = (index, pageSize) => {

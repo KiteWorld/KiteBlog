@@ -1,6 +1,6 @@
 var mysql = require('mysql');
 var conf = require("../config/db")
-let async = require('async');
+var async = require('async');
 var sql = require("./userSqlMapping");
 const {
 	queryParamsFilter,
@@ -15,7 +15,58 @@ const {
 var pool = mysql.createPool(conf.mysql)
 
 module.exports = {
-	//这里主要是为了演示(前期没有 async 模块，懒得改), 使用了 async...await...。实际项目中推荐使用 async 模块来完成。
+	//这里主要是为了演示(其实是懒得改，哈哈), 使用了 async...await...。实际项目中推荐使用 async 模块来完成。
+	saveUser: (req, res, next) => {
+		pool.getConnection(async function (err, connection) {
+			if (err) return
+			var param = req.body;
+			let queryByName = () => {
+				return new Promise((resolve, reject) => {
+					connection.query(sql.queryByName, param.userName, function (err, result) {
+						if (err) {
+							console.log(err)
+						} else {
+							resolve(result)
+						}
+					})
+				})
+			}
+			let saveValues = [param.userName, param.password, param.userRole, param.userStatus, param.avatar || null, param.userSex || 0, curTime()]
+			if (param.userId) saveValues.push(param.userId)
+			let saveUser = () => {
+				return new Promise((resolve, reject) => {
+					connection.query(param.userId ? sql.update : sql.insert, saveValues, function (err, result) {
+						if (err) {
+							console.log(err)
+						} else {
+							resolve({
+								code: 0,
+								msg: "保存成功"
+							})
+						}
+					})
+				})
+			}
+			let responeRes = null
+			let queryRes = await queryByName()
+			if (queryRes && queryRes.length > 0) {
+				if (param.userId !== queryRes[0].u_id) {
+					responeRes = {
+						code: 1,
+						msg: "用户已存在"
+					}
+					jsonWrite(res, responeRes)
+					connection.release()
+					return
+				}
+
+			}
+			let saveRes = await saveUser()
+			responeRes = saveRes || null
+			jsonWrite(res, responeRes)
+			connection.release()
+		})
+	},
 	add: function (req, res, next) {
 		pool.getConnection(async function (err, connection) {
 			if (err) {
@@ -49,6 +100,7 @@ module.exports = {
 			}
 			let responeRes = null
 			let queryRes = await queryByName()
+			console.log(queryRes)
 			if (queryRes && queryRes.length > 0) {
 				responeRes = {
 					code: 1,
@@ -168,18 +220,19 @@ module.exports = {
 			})
 		})
 	},
-	queryById: function (req, res, next) {
+	queryUserById: function (req, res, next) {
 		const userId = req.query.userId
 		pool.getConnection(function (err, connection) {
 			if (err) {
 				return
 			}
-			connection.query(sql.queryById, userId, function (err, result) {
+			connection.query(sql.queryUserById, userId, function (err, result) {
 				if (err) {
 					console.log(err)
 				} else {
 					result = {
 						code: 0,
+						data: result[0],
 						msg: "查询成功"
 					}
 				}
@@ -239,7 +292,7 @@ module.exports = {
 	queryAllUsersList: function (req, res, next) {
 		pool.getConnection(async function (err, connection) {
 			if (err) return
-			connection.query(sql.queryAllUsersList, [req.query.userRole, '%' + req.query.userName + '%'], function (err, result) {
+			connection.query(sql.queryAllUsersList, ['tocms', '%' + req.query.userName + '%'], function (err, result) {
 				if (err) {
 					console.log(err)
 				} else {
@@ -256,6 +309,9 @@ module.exports = {
 			})
 		})
 	},
+
+
+
 	//CMS用户
 	saveCMSUser: (req, res, next) => {
 		pool.getConnection(async function (err, connection) {
@@ -263,7 +319,7 @@ module.exports = {
 			var param = req.body;
 			let queryCMSUserByName = () => {
 				return new Promise((resolve, reject) => {
-					connection.query(sql.queryCMSUserByName, param.name, function (err, result) {
+					connection.query(sql.queryCMSUserByName, param.userName, function (err, result) {
 						if (err) {
 							console.log(err)
 						} else {
@@ -272,7 +328,7 @@ module.exports = {
 					})
 				})
 			}
-			let saveValues = [param.userName, param.password, param.role, param.avatar, param.userId, param.createDate]
+			let saveValues = [param.userName, param.password, param.userRole, param.avatar || null, param.ToCUserId || null, curTime()]
 			if (param.CMSUserId) saveValues.push(param.CMSUserId)
 			let saveCMSUser = () => {
 				return new Promise((resolve, reject) => {
@@ -289,9 +345,9 @@ module.exports = {
 				})
 			}
 			let responeRes = null
-			if (!param.CMSUserId) {
-				let queryRes = await queryCMSUserByName()
-				if (queryRes && queryRes.length > 0) {
+			let queryRes = await queryCMSUserByName()
+			if (queryRes && queryRes.length > 0) {
+				if (param.CMSUserId !== queryRes[0].cms_u_id) {
 					responeRes = {
 						code: 1,
 						msg: "用户已存在"
@@ -300,9 +356,11 @@ module.exports = {
 					connection.release()
 					return
 				}
+
 			}
 			let saveRes = await saveCMSUser()
 			responeRes = saveRes || null
+
 			jsonWrite(res, responeRes)
 			connection.release()
 		})
@@ -353,6 +411,12 @@ module.exports = {
 		})
 	},
 	deleteCMSUser: function (req, res, next) {
+		if (req.body.CMSUserIds.includes(req.user.CMSUserId)) {
+			return jsonWrite(res, {
+				code: 1,
+				msg: "无法删除自身账号"
+			})
+		}
 		pool.getConnection(function (err, connection) {
 			if (err) {
 				return

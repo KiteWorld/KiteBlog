@@ -8,8 +8,16 @@ router.get('/queryUser', function (req, res, next) {
   userDao.queryUser(req, res, next)
 });
 
+router.get('/queryUserById', function (req, res, next) {
+  userDao.queryUserById(req, res, next)
+});
+
 router.get('/queryAllUsersList', function (req, res, next) {
   userDao.queryAllUsersList(req, res, next)
+});
+
+router.post('/saveUser', function (req, res, next) {
+  userDao.saveUser(req, res, next)
 });
 
 router.post('/addUser', function (req, res, next) {
