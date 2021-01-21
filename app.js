@@ -95,25 +95,17 @@ app.use(function (req, res, next) {
 
 // error handler
 app.use(function (err, req, res, next) {
+  console.log(err)
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
   res.status(err.status || 500);
-  // if (err.inner.name === "TokenExpiredError") {
-  //   jsonWrite(res, {
-  //     code: 911, //call 911!
-  //     msg: "token已失效，请重新登录账号"
-  //   })
-  // }
-  if (err.name === "UnauthorizedError") {
-    res.status(401)
+  if (err.status === 401) {
     jsonWrite(res, {
       code: 911, //call 911!
       msg: err.message
     })
   }
-  // render the error page
-
   res.render('error');
 });
 

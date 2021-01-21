@@ -20,9 +20,9 @@ module.exports = {
 		pool.getConnection(async function (err, connection) {
 			if (err) return
 			var param = req.body;
-			let queryByName = () => {
+			let queryIsExist = () => {
 				return new Promise((resolve, reject) => {
-					connection.query(sql.queryByName, param.userName, function (err, result) {
+					connection.query(sql.queryIsExist, [param.userName, param.email || null, param.phone || null], function (err, result) {
 						if (err) {
 							console.log(err)
 						} else {
@@ -31,7 +31,7 @@ module.exports = {
 					})
 				})
 			}
-			let saveValues = [param.userName, param.password, param.userRole, param.userStatus, param.avatar || null, param.userSex || 0, curTime()]
+			let saveValues = [param.userName, param.password, param.userRole, param.userStatus, param.avatar || null, param.userSex || 0, param.email, param.phone, curTime()]
 			if (param.userId) saveValues.push(param.userId)
 			let saveUser = () => {
 				return new Promise((resolve, reject) => {
@@ -48,18 +48,37 @@ module.exports = {
 				})
 			}
 			let responeRes = null
-			let queryRes = await queryByName()
+			let queryRes = await queryIsExist()
 			if (queryRes && queryRes.length > 0) {
-				if (param.userId !== queryRes[0].u_id) {
-					responeRes = {
-						code: 1,
-						msg: "用户已存在"
+				const isExist = queryRes.some(x => {
+					//如果查询出来的 id 和传入的 id 相等，说明他们是同一个用户，不需要和自己对比
+					if (param.userId !== x.u_id) {
+						if (param.userName && param.userName === x.u_name) {
+							responeRes = {
+								code: 1,
+								msg: "用户名已经被使用"
+							}
+						}
+						if (param.email && param.email === x.u_email) {
+							responeRes = {
+								code: 1,
+								msg: "邮箱已经注册了"
+							}
+						}
+						if (param.phone && param.phone === x.u_phone) {
+							responeRes = {
+								code: 1,
+								msg: "手机已经注册了"
+							}
+						}
+						return true
 					}
+				});
+				if (isExist) {
 					jsonWrite(res, responeRes)
 					connection.release()
 					return
 				}
-
 			}
 			let saveRes = await saveUser()
 			responeRes = saveRes || null
@@ -100,7 +119,6 @@ module.exports = {
 			}
 			let responeRes = null
 			let queryRes = await queryByName()
-			console.log(queryRes)
 			if (queryRes && queryRes.length > 0) {
 				responeRes = {
 					code: 1,
@@ -328,8 +346,8 @@ module.exports = {
 					})
 				})
 			}
-			let saveValues = [param.userName, param.password, param.userRole, param.avatar || null, param.ToCUserId || null, curTime()]
-			if (param.CMSUserId) saveValues.push(param.CMSUserId)
+			let saveValues = [param.userName, param.password, param.userRole, param.avatar || null, param.ToCUserId || null, curTime(), param.jobNo]
+			if (param.CMSUserId) saveValues[saveValues.length - 1] = param.CMSUserId
 			let saveCMSUser = () => {
 				return new Promise((resolve, reject) => {
 					connection.query(param.CMSUserId ? sql.updateCMSUser : sql.insertCMSUser, saveValues, function (err, result) {
@@ -458,4 +476,29 @@ module.exports = {
 		})
 	},
 
+	//实际项目不推荐显示工号，后端自动分配就好，这里为了方便查看新增的工号是多少才做了这个接口
+	queryJobNoMax: function (req, res, next) {
+		pool.getConnection(function (err, connection) {
+			if (err) {
+				return
+			}
+			const sqlFormatter = sql.queryJobNoMax + (req.query.userRole === "superadmin" ? "cms_u_job_no > 100000000" : "1 <= cms_u_job_no and cms_u_job_no <= 100000000")
+			connection.query(sqlFormatter, function (err, result) {
+				if (err) {
+					console.log(err)
+				} else {
+					console.log(result)
+					const jobNo = ((Number(result[0].jobNo) + 1) + "").padStart(6, "0")
+					result[0].jobNo = jobNo
+					result = {
+						code: 0,
+						data: result[0],
+						msg: "查询成功"
+					}
+				}
+				jsonWrite(res, result)
+				connection.release()
+			})
+		})
+	}
 }

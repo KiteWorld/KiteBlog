@@ -41,6 +41,10 @@ router.get('/queryCMSUserById', function (req, res, next) {
   userDao.queryCMSUserById(req, res, next)
 });
 
+router.get('/queryJobNoMax', function (req, res, next) {
+  userDao.queryJobNoMax(req, res, next)
+});
+
 router.post('/saveCMSUser', function (req, res, next) {
   userDao.saveCMSUser(req, res, next)
 });

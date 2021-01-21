@@ -64,7 +64,7 @@ module.exports = {
 						connection.rollback((err) => {
 							connection.release();
 							error = err || error
-							jsonWrite(res, null)
+							jsonWrite(res, error)
 						});
 					} else {
 						connection.commit((err, result) => {

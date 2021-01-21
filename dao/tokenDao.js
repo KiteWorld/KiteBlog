@@ -16,7 +16,7 @@ module.exports = {
 			}
 			let param = req.body
 			let sqlType = type === 'CMS' ? sql.adminLogin : sql.login;
-			connection.query(sqlType, [param.name, param.password], function (err, result) {
+			connection.query(sqlType, [param.jobNo, param.password], function (err, result) {
 				let ret;
 				if (err) {
 					console.log(err)
@@ -34,6 +34,7 @@ module.exports = {
 										expiresIn: "24h", //token有效期
 									}),
 									name: userObj.name,
+									jobNo: userObj.jobNo,
 									role: userObj.role,
 									userId: userObj.userId,
 									CMSUserId: userObj.CMSUserId
