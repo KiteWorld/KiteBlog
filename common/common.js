@@ -201,7 +201,9 @@ let routerItemFormatter = (item) => {
 			noCache: Boolean(item.noCache),
 			icon: item.icon,
 			roles: item.roles.split(",") || [item.roles],
-			level: item.routerLevel
+			level: item.routerLevel,
+			routerId: item.routerId,
+			order: item.routerOrder
 		},
 	}
 	if (item.redirect) routerItem.redirect = item.redirect
