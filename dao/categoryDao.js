@@ -12,7 +12,6 @@ const {
 	CATEGORY_TO_DB,
 	CATEGORY_TO_FRONT
 } = require("../common/sqlFields");
-const e = require('express');
 var pool = mysql.createPool(conf.mysql)
 
 module.exports = {
@@ -94,7 +93,7 @@ module.exports = {
 				let values = [x.categoryName, type !== "article" ? 0 : x.categoryParentId, x.categoryStatus, x.categoryOrder, type, x.categoryLevel || 1, x.description || null]
 				return values
 			})
-			//批量添加，valuesList为数组，数组的每一项也数组（values），就是需要添加的单条数据。传值给query()时，valuesList还需要放在数组里面 [valuesList]
+			//批量添加，valuesList为数组，数组的每一项又是数组，（values）就是需要添加的单条数据。传值给query()时，valuesList还需要放在数组里面 [valuesList]
 			connection.query(sql.insertCats, [valuesList], (err, result) => {
 				if (err) {
 					console.log(err)

@@ -189,7 +189,7 @@ let transaction = (sqlparamsEntities, callback, asyncMethod = "series") => {
 	});
 };
 
-let routerItemFormatter = (item) => {
+let routerItemFormatter = (item, indexArr) => {
 	const routerItem = {
 		path: item.path,
 		component: item.component,
@@ -203,7 +203,12 @@ let routerItemFormatter = (item) => {
 			roles: item.roles.split(",") || [item.roles],
 			level: item.routerLevel,
 			routerId: item.routerId,
-			order: item.routerOrder
+			parentId: item.routerParentId,
+			order: item.routerOrder,
+			isExternal: Boolean(item.isExternal),
+			target: item.target,
+			index: indexArr,
+
 		},
 	}
 	if (item.redirect) routerItem.redirect = item.redirect
