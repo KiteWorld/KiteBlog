@@ -3,8 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
-    "nodemon-start": "nodemon  ./bin/www "
+    "start-dev-win": "set NODE_ENV=development&&nodemon ./bin/www",
+    "start-pro-win": "set NODE_ENV=production&&node ./bin/www",
+    "start-dev-linux&mac": "export NODE_ENV=development&&nodemon ./bin/www",
+    "start-pro-linux&mac": "export NODE_ENV=production&&node ./bin/www",
+    "pm2-dev-win": "set NODE_ENV=development&&pm2 start ./bin/www",
+    "pm2-pro-win": "set NODE_ENV=production&&pm2 start ./bin/www",
+    "pm2-dev-linux&mac": "export NODE_ENV=development&&pm2 start ./bin/www",
+    "pm2-pro-linux&mac": "export NODE_ENV=production&&pm2 start ./bin/www"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",

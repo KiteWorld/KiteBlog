@@ -8,10 +8,10 @@ const {
 	turnPage,
 	transaction
 } = require('../common/common');
-const {
-	CATEGORY_TO_DB,
-	CATEGORY_TO_FRONT
-} = require("../common/sqlFields");
+// const {
+// 	CATEGORY_TO_DB,
+// 	CATEGORY_TO_FRONT
+// } = require("../common/sqlFields");
 var pool = mysql.createPool(conf.mysql)
 
 module.exports = {
@@ -365,128 +365,128 @@ module.exports = {
 			jsonWrite(res, result);
 		}, "parallel")
 	},
-	//适用于一次性保存。如果类型很多建议改成把 增删改分开
-	save: function (req, res, next) {
-		pool.getConnection(async function (err, connection) {
-			if (err) {
-				return
-			}
-			let categories = req.body.categories
-			let addCats = []
-			let updateCats = []
-			let updateIds = req.body.updateCatIds //删、改的数据id
-			let categoriesIds = await getCatIdsDao()
-			//获取删除的类别
-			let deleteCatIds = (categories.filter(x => x.categoryId || false)).map(y => {
-				if (!categoriesIds.includes(y)) return y
-			})
-			let paramProps = Object.keys(CATEGORY_TO_FRONT)
-			categories.forEach(x => {
-				const item = getFilterParams(x, paramProps)
-				if (!item.categoryId) {
-					addCats.push(item)
-				} else {
-					//避免数据库操作没有修改的数据
-					if (updateIds.includes(item.categoryId)) {
-						updateCats.push(item)
-					}
-				}
-			});
+	// //适用于一次性保存。如果类型很多建议改成把 增删改分开
+	// save: function (req, res, next) {
+	// 	pool.getConnection(async function (err, connection) {
+	// 		if (err) {
+	// 			return
+	// 		}
+	// 		let categories = req.body.categories
+	// 		let addCats = []
+	// 		let updateCats = []
+	// 		let updateIds = req.body.updateCatIds //删、改的数据id
+	// 		let categoriesIds = await getCatIdsDao()
+	// 		//获取删除的类别
+	// 		let deleteCatIds = (categories.filter(x => x.categoryId || false)).map(y => {
+	// 			if (!categoriesIds.includes(y)) return y
+	// 		})
+	// 		let paramProps = Object.keys(CATEGORY_TO_FRONT)
+	// 		categories.forEach(x => {
+	// 			const item = getFilterParams(x, paramProps)
+	// 			if (!item.categoryId) {
+	// 				addCats.push(item)
+	// 			} else {
+	// 				//避免数据库操作没有修改的数据
+	// 				if (updateIds.includes(item.categoryId)) {
+	// 					updateCats.push(item)
+	// 				}
+	// 			}
+	// 		});
 
-			let getCatIdsDao = () => {
-				return new Promise((resolve, reject) => {
-					connection.query(sql.getCatIds, function (err, result) {
-						if (err) {
-							reject(err)
-						} else {
-							resolve(result)
-						}
-					})
-				})
-			}
-			let insertCatsDao = () => {
-				return new Promise((resolve, reject) => {
-					let fields = Object.keys(CATEGORY_TO_DB)
-					let insertContentList = addCats.map(x => {
-						let values = []
-						for (const key in x) {
-							if (Object.hasOwnProperty.call(x, key) && fields.includes(key)) {
-								values = x[key];
-							}
-						}
-						return values.join(",")
-					})
-					connection.query(sql.insertCats(insertContentList.join(",")), function (err, result) {
-						if (err) {
-							resolve(err)
-						} else {
-							resolve(result)
-						}
-					})
-				})
-			}
-			let delCatsDao = () => {
-				return new Promise((resolve, reject) => {
-					connection.query(sql.delCats(connection.escape(deleteCatIds.join(","))), function (err, result) {
-						if (err) {
-							reject(err)
-						} else {
-							resolve(result)
-						}
-					})
-				})
-			}
-			let updateCatsDao = () => {
-				return new Promise((resolve, reject) => {
-					let str = ""
-					let fieldStrObj = {};
-					updateCats.forEach(x => {
-						for (const key in x) {
-							if (Object.hasOwnProperty.call(x, key !== "categoryId")) {
-								fieldStrObj[x] += `when ${x.categoryId} then ${x[key]} `;
-							}
-						}
-					})
-					paramProps.forEach(x => {
-						if (x !== "categoryId") {
-							str += `${x} = case categoryId `
-							str += fieldStrObj[x]
-						}
-					})
-					connection.query(sql.updateCats(str), function (err, result) {
-						if (err) {
-							reject(result)
-							console.log(err)
-						} else {
-							resolve(result)
-						}
-					})
-				})
-			}
-			connection.beginTransaction((err) => {
-				if (err) {
-					return console.log(err)
-				}
-				let promiseList = []
-				if (addCats.length > 0) promiseList.push(insertCatsDao)
-				if (deleteCatIds.length > 0) promiseList.push(delCatsDao)
-				if (updateCats.length > 0) promiseList.push(updateCatsDao)
-				if (promiseList.length == 0) {
-					return
-				}
-				Promise.all(promiseList).then(result => {
-					result = {
-						code: 0,
-						msg: "保存成功"
-					}
-					jsonWrite(res, result)
-					connection.release()
-				}).catch(err => {
-					connection.rollback()
-					connection.release()
-					console.log(err)
-				})
-			})
-		})
-	},
+	// 		let getCatIdsDao = () => {
+	// 			return new Promise((resolve, reject) => {
+	// 				connection.query(sql.getCatIds, function (err, result) {
+	// 					if (err) {
+	// 						reject(err)
+	// 					} else {
+	// 						resolve(result)
+	// 					}
+	// 				})
+	// 			})
+	// 		}
+	// 		let insertCatsDao = () => {
+	// 			return new Promise((resolve, reject) => {
+	// 				let fields = Object.keys(CATEGORY_TO_DB)
+	// 				let insertContentList = addCats.map(x => {
+	// 					let values = []
+	// 					for (const key in x) {
+	// 						if (Object.hasOwnProperty.call(x, key) && fields.includes(key)) {
+	// 							values = x[key];
+	// 						}
+	// 					}
+	// 					return values.join(",")
+	// 				})
+	// 				connection.query(sql.insertCats(insertContentList.join(",")), function (err, result) {
+	// 					if (err) {
+	// 						resolve(err)
+	// 					} else {
+	// 						resolve(result)
+	// 					}
+	// 				})
+	// 			})
+	// 		}
+	// 		let delCatsDao = () => {
+	// 			return new Promise((resolve, reject) => {
+	// 				connection.query(sql.delCats(connection.escape(deleteCatIds.join(","))), function (err, result) {
+	// 					if (err) {
+	// 						reject(err)
+	// 					} else {
+	// 						resolve(result)
+	// 					}
+	// 				})
+	// 			})
+	// 		}
+	// 		let updateCatsDao = () => {
+	// 			return new Promise((resolve, reject) => {
+	// 				let str = ""
+	// 				let fieldStrObj = {};
+	// 				updateCats.forEach(x => {
+	// 					for (const key in x) {
+	// 						if (Object.hasOwnProperty.call(x, key !== "categoryId")) {
+	// 							fieldStrObj[x] += `when ${x.categoryId} then ${x[key]} `;
+	// 						}
+	// 					}
+	// 				})
+	// 				paramProps.forEach(x => {
+	// 					if (x !== "categoryId") {
+	// 						str += `${x} = case categoryId `
+	// 						str += fieldStrObj[x]
+	// 					}
+	// 				})
+	// 				connection.query(sql.updateCats(str), function (err, result) {
+	// 					if (err) {
+	// 						reject(result)
+	// 						console.log(err)
+	// 					} else {
+	// 						resolve(result)
+	// 					}
+	// 				})
+	// 			})
+	// 		}
+	// 		connection.beginTransaction((err) => {
+	// 			if (err) {
+	// 				return console.log(err)
+	// 			}
+	// 			let promiseList = []
+	// 			if (addCats.length > 0) promiseList.push(insertCatsDao)
+	// 			if (deleteCatIds.length > 0) promiseList.push(delCatsDao)
+	// 			if (updateCats.length > 0) promiseList.push(updateCatsDao)
+	// 			if (promiseList.length == 0) {
+	// 				return
+	// 			}
+	// 			Promise.all(promiseList).then(result => {
+	// 				result = {
+	// 					code: 0,
+	// 					msg: "保存成功"
+	// 				}
+	// 				jsonWrite(res, result)
+	// 				connection.release()
+	// 			}).catch(err => {
+	// 				connection.rollback()
+	// 				connection.release()
+	// 				console.log(err)
+	// 			})
+	// 		})
+	// 	})
+	// },
 }

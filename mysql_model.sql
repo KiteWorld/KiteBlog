@@ -11,7 +11,7 @@
  Target Server Version : 50731
  File Encoding         : 65001
 
- Date: 21/01/2021 19:56:19
+ Date: 26/01/2021 17:20:31
 */
 
 SET NAMES utf8mb4;
@@ -92,8 +92,8 @@ CREATE TABLE `k_category`  (
 -- ----------------------------
 -- Records of k_category
 -- ----------------------------
-INSERT INTO `k_category` VALUES (275, '前端', 0, 'article', 1, '', 1, 1);
-INSERT INTO `k_category` VALUES (276, '后端', 0, 'article', 2, NULL, 1, 0);
+INSERT INTO `k_category` VALUES (275, '前端', 0, 'article', 3, NULL, 1, 1);
+INSERT INTO `k_category` VALUES (276, '后端', 0, 'article', 2, NULL, 1, 1);
 INSERT INTO `k_category` VALUES (277, 'HTML', 275, 'article', 1, NULL, 2, 1);
 INSERT INTO `k_category` VALUES (278, 'CSS', 275, 'article', 2, NULL, 2, 1);
 INSERT INTO `k_category` VALUES (279, 'JavaScript', 275, 'article', 3, NULL, 2, 1);
@@ -279,33 +279,36 @@ CREATE TABLE `k_router`  (
   `r_path` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `r_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `r_title` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `r_affix` smallint(6) NOT NULL DEFAULT 0,
+  `r_affix` tinyint(6) NOT NULL DEFAULT 0,
   `r_roles` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `r_icon` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
-  `r_nocache` smallint(6) NOT NULL DEFAULT 0,
+  `r_nocache` tinyint(6) NOT NULL DEFAULT 0,
   `r_redirect` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `r_component` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `r_parentid` int(11) NOT NULL DEFAULT 0,
-  `r_order` int(11) NOT NULL,
+  `r_order` int(11) NOT NULL DEFAULT 1,
   `r_level` int(11) NOT NULL DEFAULT 1,
+  `r_is_external` tinyint(1) NULL DEFAULT NULL,
+  `r_target` varchar(7) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`r_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 30 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of k_router
 -- ----------------------------
-INSERT INTO `k_router` VALUES (1, 'user', 'User', '用户管理', 0, 'superadmin,admin', 'el-icon-user', 1, '', 'Main', 0, 2, 1);
-INSERT INTO `k_router` VALUES (2, 'article', 'Article', '文章管理', 0, 'superadmin,admin,editor', 'el-icon-document', 1, NULL, 'Article', 0, 3, 1);
-INSERT INTO `k_router` VALUES (3, 'hotPoint', 'HotPoint', '沸点管理', 0, 'superadmin,admin,editor', 'el-icon-chat-square', 1, NULL, 'HotPoint', 0, 4, 1);
-INSERT INTO `k_router` VALUES (4, 'template', 'Template', '模板管理', 0, 'superadmin,admin,editor', 'el-icon-document-copy', 1, NULL, 'Template', 0, 5, 1);
-INSERT INTO `k_router` VALUES (5, 'category', 'Category', '分类管理', 0, 'superadmin,admin', 'el-icon-menu', 1, NULL, 'Main', 0, 6, 1);
-INSERT INTO `k_router` VALUES (6, 'articleCategory', 'ArticleCategory', '文章分类', 0, 'superadmin,admin', '', 1, NULL, 'ArticleCategory', 5, 1, 2);
-INSERT INTO `k_router` VALUES (7, 'hotPointCategory', 'HotPointCategory', '沸点分类', 0, 'superadmin,admin', NULL, 1, NULL, 'HotPointCategory', 5, 2, 2);
-INSERT INTO `k_router` VALUES (8, 'templateCategory', 'TemplateCategory', '模板分类', 0, 'superadmin,admin', NULL, 1, NULL, 'TemplateCategory', 5, 3, 2);
-INSERT INTO `k_router` VALUES (9, 'editor', 'Editor', '编辑器', 0, 'superadmin,admin,editor', 'el-icon-edit', 1, NULL, 'Editor', 0, 7, 1);
-INSERT INTO `k_router` VALUES (10, 'dashboard', 'Dashboard', 'Dashboard', 1, 'superadmin,admin,editor', 'el-icon-odometer', 1, '', 'Dashboard', 0, 1, 1);
-INSERT INTO `k_router` VALUES (11, 'user_toc', 'UserToC', 'ToC用户', 0, 'superadmin,admin', NULL, 1, NULL, 'UserToC', 1, 1, 2);
-INSERT INTO `k_router` VALUES (12, 'user_cms', 'UserCMS', 'CMS用户', 0, 'superadmin', NULL, 1, NULL, 'UserCMS', 1, 2, 2);
+INSERT INTO `k_router` VALUES (1, 'user', 'User', '用户管理', 0, 'superadmin,admin', 'el-icon-user', 1, '', 'Main', 0, 2, 1, NULL, '_self');
+INSERT INTO `k_router` VALUES (3, 'hotPoint', 'HotPoint', '沸点管理', 0, 'superadmin,admin,editor', 'el-icon-chat-square', 1, NULL, 'HotPoint', 0, 4, 1, NULL, '_self');
+INSERT INTO `k_router` VALUES (4, 'template', 'Template', '模板管理', 0, 'superadmin,admin,editor', 'el-icon-document-copy', 1, NULL, 'Template', 0, 5, 1, NULL, '_self');
+INSERT INTO `k_router` VALUES (5, 'category', 'Category', '分类管理', 0, 'superadmin,admin', 'el-icon-menu', 1, NULL, 'Main', 0, 6, 1, NULL, '_self');
+INSERT INTO `k_router` VALUES (6, 'articleCategory', 'ArticleCategory', '文章分类', 0, 'superadmin,admin', '', 1, NULL, 'ArticleCategory', 5, 1, 2, NULL, '_self');
+INSERT INTO `k_router` VALUES (7, 'hotPointCategory', 'HotPointCategory', '沸点分类', 0, 'superadmin,admin', NULL, 1, NULL, 'HotPointCategory', 5, 2, 2, NULL, '_self');
+INSERT INTO `k_router` VALUES (8, 'templateCategory', 'TemplateCategory', '模板分类', 0, 'superadmin,admin', NULL, 1, NULL, 'TemplateCategory', 5, 3, 2, NULL, '_self');
+INSERT INTO `k_router` VALUES (9, 'editor', 'Editor', '编辑器', 0, 'superadmin,admin,editor', 'el-icon-edit', 1, NULL, 'Editor', 0, 7, 1, NULL, '_self');
+INSERT INTO `k_router` VALUES (10, 'dashboard', 'Dashboard', 'Dashboard', 1, 'superadmin,admin,editor', 'el-icon-odometer', 1, NULL, 'Dashboard', 0, 1, 1, 0, '_self');
+INSERT INTO `k_router` VALUES (11, 'user_toc', 'UserToC', 'ToC用户', 0, 'superadmin,admin', NULL, 1, NULL, 'UserToC', 1, 1, 2, 0, '_self');
+INSERT INTO `k_router` VALUES (12, 'user_cms', 'UserCMS', 'CMS用户', 0, 'superadmin', NULL, 1, NULL, 'UserCMS', 1, 2, 2, NULL, '_self');
+INSERT INTO `k_router` VALUES (13, 'permission', 'Permission', '权限管理', 0, 'superadmin', 'el-icon-lock', 1, NULL, 'Main', 0, 1, 1, 0, '_self');
+INSERT INTO `k_router` VALUES (14, 'routerconfig', 'RouterConfig', '路由权限配置', 0, 'superadmin', '', 1, NULL, 'RouterConfig', 13, 1, 2, 0, '_self');
 
 -- ----------------------------
 -- Table structure for k_user

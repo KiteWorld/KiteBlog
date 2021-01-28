@@ -5,8 +5,8 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var expressJWT = require('express-jwt');
 
+require('./config/global') // 根据不同环境设置通用配置
 
-const EUM = require('./common/enumerate')
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var loginRouter = require('./routes/login');
@@ -15,7 +15,6 @@ var articleRouter = require('./routes/article');
 var hotPointRouter = require('./routes/hotPoint');
 var viewRouter = require('./routes/router');
 var uploadRouter = require('./routes/upload');
-
 const {
   jsonWrite
 } = require('./common/common');
@@ -35,7 +34,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(expressJWT({
-  secret: EUM.SECRET_KEY,
+  secret: global.servers.SECRET_KEY,
   algorithms: ['HS256'], //express-jwt 6.0 需要添加加密方式
 }).unless({
   path: ['/', '/auth', '/auth/adminLogin', "/auth/login", /^\/public\/.*/] //不需要token验证的请求

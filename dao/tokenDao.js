@@ -3,7 +3,6 @@ var conf = require("../config/db")
 var jsonWebToken = require('jsonwebtoken');
 var sql = require("./tokenSqlMapping")
 var common = require("../common/common")
-var ENU = require("../common/enumerate");
 var pool = mysql.createPool(conf.mysql)
 
 
@@ -30,7 +29,7 @@ module.exports = {
 									token: jsonWebToken.sign({
 										CMSUserId: userObj.CMSUserId,
 										role: userObj.role,
-									}, ENU.SECRET_KEY, {
+									}, global.servers.SECRET_KEY, {
 										expiresIn: "24h", //token有效期
 									}),
 									name: userObj.name,
@@ -47,7 +46,7 @@ module.exports = {
 									token: jsonWebToken.sign({
 										userId: userObj.userId,
 										role: userObj.role,
-									}, ENU.SECRET_KEY, {
+									}, global.servers.SECRET_KEY, {
 										expiresIn: 60 * 60 * 24 * 7, // 两种写法
 									}),
 									name: userObj.name,

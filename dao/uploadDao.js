@@ -1,9 +1,6 @@
 const {
 	jsonWrite,
 } = require("../common/common");
-const {
-	ROOT_URL,
-} = require("../common/enumerate");
 
 module.exports = {
 	uploadAvatar: function (req, res, next) {
@@ -11,7 +8,7 @@ module.exports = {
 		jsonWrite(res, {
 			code: 1,
 			data: {
-				imgUrl: ROOT_URL + req.file.destination + "/" + req.file.filename
+				imgUrl: global.servers.BASE_URL + req.file.destination + "/" + req.file.filename
 			},
 			msg: "上传成功"
 		})
