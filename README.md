@@ -1,16 +1,16 @@
-## 胡说八道
-
-半年前端抠图仔，不知天高地厚，尝试用 node 做一个类似于「掘金」的社区项目，主要是一个边工作边学边写的过程，我也只是初学者，写的不好的地方请多多包涵指教。整个项目主要有三部分： Node 服务端 、管理后台和前台界面。预计完成时间3个月 (也只是预计，看看就好）。这个仓库是后端部分，前端部分文章下面有介绍和链接。
-
 
 ### 项目文档 && 预览
 
-(Gitee文档(推荐))[http://kiteworld.gitee.io/kiteblog-site/] || (GitHub文档)[https://kiteworld.github.io/kiteblog-site/] || (项目预览)[https://kiteblog.cms.kite1874.com/#/adminLogin]
+[项目文档「国内推荐」](http://kiteworld.gitee.io/kiteblog-site/) || [项目文档](https://kiteworld.github.io/kiteblog-site/) || [项目预览](https://kiteblog.cms.kite1874.com/#/adminLogin)
 
+
+### Node 服务端（当前仓库）
+
+Token 生成验证、手写SQL、文件上传、跨域配置、https配置、websocket(配合数据可视化界面，开发中)、生成/开发环境配置...
 
 ### 管理后台（前端）
 
-功能特色：动态加载导航栏菜单（支持无限级）、顶部Tab（不同页面之间切换）、基于 elementUI 的 table 组件进行二次封装、searchInput 搜索组件、Echarts 可视化控制台、无限级文章分类（功能可以，不过推荐限制级数 3-4级基本能满足需求了）....
+项目特点：动态加载导航栏菜单（支持无限级）、顶部Tab（不同页面之间切换）、基于 elementUI 的 table 组件进行二次封装、searchInput 搜索组件、Echarts 可视化控制台、无限级文章分类（功能可以，不过推荐限制级数 3-4级基本能满足需求了）....
 
 项目链接：[KiteBlog_Front_Admin](https://github.com/KiteWorld/KiteBlog_Front_Admin)
 - 控制台 （ Echarts可视化， 监控日活量、停留时间等）
@@ -30,4 +30,10 @@
 项目链接：[KiteBlog_Front_ToC](https://github.com/KiteWorld/KiteBlog_Front_ToC)
 
 
+### 胡说八道
 
+半年前端抠图仔，不知天高地厚，尝试用 node 做一个类似于「掘金」的社区项目，主要是一个边工作边学边写的过程，我也只是初学者，写的不好的地方请多多包涵指教。
+
+整个项目主要有三部分： Node 服务端 、管理后台和前台界面。预计完成时间3个月 (也只是预计，看看就好）。这个仓库是后端部分。
+
+如果你能从项目中学到点什么，不要忘了点个 "star:star:"~!。鼓励一下我这个前端萌新，哈哈
