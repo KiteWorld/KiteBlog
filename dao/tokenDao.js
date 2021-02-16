@@ -31,6 +31,7 @@ module.exports = {
 										role: userObj.role,
 									}, global.servers.SECRET_KEY, {
 										expiresIn: "24h", //token有效期
+										// algorithm:"HS256"  默认使用 "HS256" 算法来签名
 									}),
 									name: userObj.name,
 									jobNo: userObj.jobNo,
