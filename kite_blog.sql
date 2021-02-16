@@ -11,7 +11,7 @@
  Target Server Version : 50731
  File Encoding         : 65001
 
- Date: 26/01/2021 17:20:31
+ Date: 16/02/2021 16:43:27
 */
 
 SET NAMES utf8mb4;
@@ -277,21 +277,21 @@ DROP TABLE IF EXISTS `k_router`;
 CREATE TABLE `k_router`  (
   `r_id` int(11) NOT NULL AUTO_INCREMENT,
   `r_path` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `r_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `r_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `r_title` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `r_affix` tinyint(6) NOT NULL DEFAULT 0,
   `r_roles` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `r_icon` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `r_nocache` tinyint(6) NOT NULL DEFAULT 0,
   `r_redirect` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
-  `r_component` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `r_component` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `r_parentid` int(11) NOT NULL DEFAULT 0,
   `r_order` int(11) NOT NULL DEFAULT 1,
   `r_level` int(11) NOT NULL DEFAULT 1,
   `r_is_external` tinyint(1) NULL DEFAULT NULL,
   `r_target` varchar(7) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`r_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 30 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of k_router
@@ -309,6 +309,7 @@ INSERT INTO `k_router` VALUES (11, 'user_toc', 'UserToC', 'ToC用户', 0, 'super
 INSERT INTO `k_router` VALUES (12, 'user_cms', 'UserCMS', 'CMS用户', 0, 'superadmin', NULL, 1, NULL, 'UserCMS', 1, 2, 2, NULL, '_self');
 INSERT INTO `k_router` VALUES (13, 'permission', 'Permission', '权限管理', 0, 'superadmin', 'el-icon-lock', 1, NULL, 'Main', 0, 1, 1, 0, '_self');
 INSERT INTO `k_router` VALUES (14, 'routerconfig', 'RouterConfig', '路由权限配置', 0, 'superadmin', '', 1, NULL, 'RouterConfig', 13, 1, 2, 0, '_self');
+INSERT INTO `k_router` VALUES (16, 'document', 'Document', '项目文档', 0, 'superadmin', 'el-icon-document', 1, NULL, 'Document', 0, 9999, 1, 0, '_self');
 
 -- ----------------------------
 -- Table structure for k_user
