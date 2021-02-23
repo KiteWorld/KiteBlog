@@ -33,6 +33,19 @@ app.use(express.urlencoded({
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+//跨域
+app.all('*', function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', '*');
+  res.header('Access-Control-Allow-Methods', '*');
+  res.header('Content-Type', 'application/json;charset=utf-8');
+  if (mimeType[req.url.split('.').pop()]) {
+    console.log(req.url.split('.'))
+    res.header('Content-Type', mimeType[req.url.split('.').pop()] + ';charset:UTF-8');
+  }
+  next();
+});
+
 app.use(expressJWT({
   secret: global.servers.SECRET_KEY,
   algorithms: ['HS256'], //express-jwt 6.0 需要添加加密方式
@@ -48,18 +61,7 @@ var mimeType = {
   'jpg': 'image/jpeg',
   'png': 'image/png',
 }
-//跨域
-app.all('*', function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', '*');
-  res.header('Access-Control-Allow-Methods', '*');
-  res.header('Content-Type', 'application/json;charset=utf-8');
-  if (mimeType[req.url.split('.').pop()]) {
-    console.log(req.url.split('.'))
-    res.header('Content-Type', mimeType[req.url.split('.').pop()] + ';charset:UTF-8');
-  }
-  next();
-});
+
 
 //根据不同的文件类型，设置不同 MIME 
 app.use('/public', function (req, res, next) {
@@ -93,11 +95,11 @@ app.use(function (req, res, next) {
 
 app.use(function (err, req, res, next) {
   if (err.name === 'UnauthorizedError') {
-    res.status(401).send("干嘛呢？你想硬闯？！")
-    // jsonWrite(res, {
-    //   code: 911, //call 911!
-    //   msg: err.message
-    // })
+    res.status(401)
+    jsonWrite(res, {
+      code: 401,
+      msg: err.message
+    })
   }
 })
 
