@@ -1,5 +1,6 @@
 let mysql = require("mysql")
-let conf = require("../config/db")
+let conf = require("../config/db");
+const categoryDao = require("./categoryDao");
 let pool = mysql.createPool(conf.mysql)
 let sql = require("./dashboardSqlMapping");
 module.exports = {
@@ -22,7 +23,6 @@ module.exports = {
 								if (err) {
 									reject(-1)
 								} else {
-									console.log(result)
 									resolve(result[0].total)
 								}
 							})
@@ -50,7 +50,6 @@ module.exports = {
 						if (result.length === 0) {
 							resolve([])
 						} else {
-							console.log(result)
 							resolve(result)
 						}
 						connection.release()
@@ -81,8 +80,7 @@ module.exports = {
 						return new Promise((resolve, reject) => {
 							connection.query(sqlObj[key], (err, result) => {
 								if (err) {
-									console.log(err)
-									reject(-1)
+									reject(err)
 								} else {
 									resolve(result)
 								}
@@ -96,40 +94,42 @@ module.exports = {
 			})
 		})
 	},
-	queryCatTotal: () => {
+	queryCatTotal: (categoryType) => {
 		return new Promise((resolve, reject) => {
 			pool.getConnection(async (err, connection) => {
 				if (err) {
 					reject(false)
 					return
 				}
-				// let sqlObj = {
-				// 	articleDayTotal: sql.queryArticleDayTotal(dateRange, day),
-				// 	hotPointDayTotal: sql.queryHotPointDayTotal(dateRange, day),
-				// 	userDayTotal: sql.queryUserDayTotal(dateRange, day)
-				// }
-				// const date = {
-				// 	articleDayTotal: [],
-				// 	hotPointDayTotal: [],
-				// 	userDayTotal: [],
-				// }
-				for (const key in sqlObj) {
+				let queryLevelCat = () => {
+					return new Promise((resolve, reject) => {
+						connection.query(sql.queryLevelCat, categoryType, (err, result) => {
+							if (err) {
+								reject(err)
+							} else {
+								resolve(result)
+							}
+						})
+					})
+				}
+				const categoryTotal = await queryLevelCat()
+				for (let i = 0; i < categoryTotal.length; i++) {
 					const total = () => {
 						return new Promise((resolve, reject) => {
-							connection.query(sqlObj[key], (err, result) => {
+							connection.query(categoryType === "article" ? sql.queryArticleCatTotal : sql.queryHotPointCatTotal, categoryTotal[i].categoryId, (err, result) => {
 								if (err) {
-									console.log(err)
-									reject(-1)
+									reject(err)
 								} else {
-									resolve(result)
+
+									resolve(result[0].total)
 								}
 							})
 						})
 					}
-					date[key] = await total()
+					categoryTotal[i].total = await total()
 				}
+				resolve(categoryTotal)
 				connection.release()
-				resolve(date)
 			})
 		})
 	}

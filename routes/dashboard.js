@@ -47,7 +47,6 @@ global.app.ws('/dashboard', function (ws, req) {
 							article_total: global.servers.ARTICLE_TOTAL,
 							hotpoint_total: global.servers.HOTPOINT_TOTAL,
 						}
-						console.log(data.total)
 						break;
 					case "articleHot10":
 						data.articleHot10 = await dashboardDao.articleHot10(recvData.time === "today" ? recvData.time : null)
@@ -68,7 +67,10 @@ global.app.ws('/dashboard', function (ws, req) {
 						}
 						break;
 					case "articleCatTotal":
-						data.articleCatTotal = await dashboardDao.articleCatTotal()
+						data.catTotal = await dashboardDao.queryCatTotal("article")
+						break;
+					case "hotPointCatTotal":
+						data.catTotal = await dashboardDao.queryCatTotal("hotpoint")
 						break;
 					default:
 						break;
