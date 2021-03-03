@@ -39,6 +39,9 @@ module.exports = {
 						if (err) {
 							console.log(err)
 						} else {
+							if (!param.userId) {
+								global.servers.USER_TOTAL++
+							}
 							resolve({
 								code: 0,
 								msg: "保存成功"

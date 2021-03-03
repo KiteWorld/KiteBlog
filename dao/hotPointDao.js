@@ -237,6 +237,7 @@ module.exports = {
 							console.log(err)
 							return cb(err, null);
 						} else {
+							global.servers.HOTPOINT_TOTAL++
 							return cb(null, hotPointId);
 						}
 					})

@@ -48,6 +48,7 @@ module.exports = {
 						if (err) {
 							return cb(err, null);
 						} else {
+							global.servers.ARTICLE_TOTAL++
 							return cb(null, articleId);
 						}
 					})

@@ -6,7 +6,6 @@
 
 var app = require('../app');
 var debug = require('debug')('express-demo:server');
-var http = require('http');
 
 /**
  * Get port from environment and store in Express.
@@ -21,21 +20,9 @@ app.set('port', port);
  * Create HTTP/HTTPS server.
  */
 
-var server = http.createServer(app);
+var server = global.server;
 
-if (process.env.NODE_ENV === "development") {
-  server = http.createServer(app);
-} else if (process.env.NODE_ENV === "production") {
-  var https = require('https');
-  var path = require('path')
-  var fs = require('fs');
-  //https 需要申请 SSL证书，填写服务器上存放证书的路径即可，目前根目录上没有证书文件（运行生产环境命令会报错），请更具自己的情况添加。
-  var options = {
-    key: fs.readFileSync(path.join(__dirname, '../privkey.pem')),  
-    cert: fs.readFileSync(path.join(__dirname, '../fullchain.pem'))
-  }
-  server = https.createServer(options, app);
-}
+
 server.listen(port, () => {
   console.log(`Successfully! express app listening on port ${port}...`)
 });

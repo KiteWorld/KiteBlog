@@ -1,5 +1,11 @@
 let SECRET_KEY = "";
 let BASE_URL = "";
+//记录 用户、文章、沸点总数，减少访问数据库的次数
+let USER_TOTAL = -1;
+let ARTICLE_TOTAL = -1;
+let HOTPOINT_TOTAL = -1;
+
+
 
 if (process.env.NODE_ENV === "development") {
 	SECRET_KEY = 'Kite1874'
@@ -11,7 +17,10 @@ if (process.env.NODE_ENV === "development") {
 //配置全局对象，方便调用
 global.servers = {
 	SECRET_KEY,
-	BASE_URL
+	BASE_URL,
+	USER_TOTAL,
+	ARTICLE_TOTAL,
+	HOTPOINT_TOTAL
 }
 
 // //连接数据库信息

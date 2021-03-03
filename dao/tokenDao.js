@@ -30,7 +30,8 @@ module.exports = {
 										CMSUserId: userObj.CMSUserId,
 										role: userObj.role,
 									}, global.servers.SECRET_KEY, {
-										expiresIn: "24h", //token有效期
+											expiresIn: "24h", //token有效期
+										// expiresIn: 60, //token有效期
 										// algorithm:"HS256"  默认使用 "HS256" 算法来签名
 									}),
 									name: userObj.name,

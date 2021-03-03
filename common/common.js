@@ -15,6 +15,8 @@ let jsonWrite = function (res, ret) {
 		res.json(ret)
 	}
 }
+
+
 let curTime = function () {
 	let date = new Date()
 	return timeFomatter(date)
@@ -96,6 +98,7 @@ let arrayToObject = (arr) => {
 	});
 	return obj
 }
+
 let fieldsToValues = (params, arr, enu) => {
 	let frontFeilds = arr.map(x => enu[x])
 	let values = frontFeilds.map(x => params[x]) || []
@@ -188,6 +191,7 @@ let transaction = (sqlparamsEntities, callback, asyncMethod = "series") => {
 		});
 	});
 };
+
 
 let routerItemFormatter = (item, indexArr) => {
 	const routerItem = {
@@ -294,6 +298,17 @@ let upload = (req, res, next) => {
 // 	return file
 
 // }
+let getTotal = (sql) => {
+	return new Promise((resolve, reject) => {
+		connection.query(sql.queryArticlesCount(filterContent), function (err, result) {
+			if (err) {
+				console.log(err)
+			} else {
+				resolve(result[0].total)
+			}
+		})
+	})
+}
 
 
 module.exports = {
