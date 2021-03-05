@@ -11,7 +11,7 @@
  Target Server Version : 50731
  File Encoding         : 65001
 
- Date: 16/02/2021 16:43:27
+ Date: 04/03/2021 11:16:26
 */
 
 SET NAMES utf8mb4;
@@ -44,13 +44,25 @@ CREATE TABLE `k_article`  (
   CONSTRAINT `fk_article_article_1` FOREIGN KEY (`u_id`) REFERENCES `k_user` (`u_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_article_article_2` FOREIGN KEY (`cat_id`) REFERENCES `k_category` (`cat_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_article_modifier_id` FOREIGN KEY (`a_modifier_id`) REFERENCES `k_user` (`u_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE = InnoDB AUTO_INCREMENT = 147 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 159 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of k_article
 -- ----------------------------
-INSERT INTO `k_article` VALUES (145, 'Node天下无敌！', '<p>Node天下无敌！</p>\n', '2021-01-21 19:41:29', '2021-01-21 19:41:29', 0, 0, NULL, 'pending', NULL, 14, 275, 'normal', 'Node天下无敌！', NULL);
-INSERT INTO `k_article` VALUES (146, '模板模板模板！', '<p>模板模板模板！</p>\n', '2021-01-21 19:44:23', '2021-01-21 19:44:23', 0, 0, NULL, 'pending', NULL, 14, 1935, 'normal', '模板模板模板！', NULL);
+INSERT INTO `k_article` VALUES (145, 'Node天下无敌！', '<p>Node天下无敌！</p>\n', '2021-03-02 10:25:39', '2021-02-02 17:46:28', 1000, 20, NULL, 'pending', NULL, 14, 275, 'normal', 'Node天下无敌！', NULL);
+INSERT INTO `k_article` VALUES (146, '模板模板模板！', '<p>模板模板模板！</p>\n', '2021-03-01 17:32:13', '2021-03-01 17:32:13', 200, 10, NULL, 'pending', NULL, 14, 1935, 'normal', '模板模板模板！', NULL);
+INSERT INTO `k_article` VALUES (147, 'CES', '<p>123</p>\n', '2021-03-01 17:32:21', '2021-03-01 17:32:21', 500, 100, NULL, 'pending', NULL, 14, 275, 'recommend', '123', NULL);
+INSERT INTO `k_article` VALUES (148, 'TEST', 'TEST', '2021-03-02 16:58:05', '2021-03-02 16:58:05', 213, 12, NULL, 'pending', NULL, 14, 275, 'normal', 'TEST', NULL);
+INSERT INTO `k_article` VALUES (149, '测试', '<p>123</p>\n', '2021-03-02 16:58:06', '2021-03-02 16:58:06', 123, 0, NULL, 'pending', NULL, 14, 275, 'recommend', '123', NULL);
+INSERT INTO `k_article` VALUES (150, '测试哦', '<p>123</p>\n', '2021-03-02 16:58:09', '2021-03-02 16:58:09', 122, 22, NULL, 'pending', NULL, 14, 275, 'normal', '123', NULL);
+INSERT INTO `k_article` VALUES (151, '测试', '<p>123</p>\n', '2021-03-02 16:58:10', '2021-03-02 16:58:10', 1231, 3, NULL, 'pending', NULL, 14, 276, 'recommend', '123', NULL);
+INSERT INTO `k_article` VALUES (152, '搞的', '<p>123</p>\n', '2021-03-02 16:58:18', '2021-03-02 16:58:18', 1223, 3, NULL, 'pending', NULL, 14, 278, 'recommend', '123', NULL);
+INSERT INTO `k_article` VALUES (153, '测试总数', '<p>213</p>\n', '2021-03-02 16:58:12', '2021-03-02 16:58:12', 12, 0, NULL, 'pending', NULL, 14, 276, 'normal', '213', NULL);
+INSERT INTO `k_article` VALUES (154, '123', '<p>23</p>\n', '2021-03-02 16:58:20', '2021-03-02 16:58:20', 23, 4, NULL, 'pending', NULL, 14, 276, 'normal', '23', NULL);
+INSERT INTO `k_article` VALUES (155, '测试哦', '<p>3</p>\n', '2021-03-02 16:58:23', '2021-03-02 16:58:23', 123, 1, NULL, 'pending', NULL, 14, 275, 'normal', '3', NULL);
+INSERT INTO `k_article` VALUES (156, 'ces111', '<p>213</p>\n', '2021-03-02 16:58:27', '2021-03-02 16:58:27', 3, 2, NULL, 'pending', NULL, 14, 275, 'normal', '213', NULL);
+INSERT INTO `k_article` VALUES (157, '再次测试111', '<p>123</p>\n', '2021-03-02 16:31:10', '2021-03-02 16:31:10', 0, 0, NULL, 'pending', NULL, 14, 276, 'recommend', '123', NULL);
+INSERT INTO `k_article` VALUES (158, '测试', '<p>e&#39;测试</p>\n', '2021-03-03 14:49:19', '2021-03-03 14:49:19', 0, 0, NULL, 'pending', NULL, 14, 1939, 'normal', 'e\'测试', NULL);
 
 -- ----------------------------
 -- Table structure for k_article_category_relationship
@@ -65,13 +77,24 @@ CREATE TABLE `k_article_category_relationship`  (
   INDEX `fk_d_article_catorgery_relationship_d_article_catorgery_relatio2`(`cat_id`) USING BTREE,
   CONSTRAINT `fk_d_article_catorgery_relationship_d_article_catorgery_relatio1` FOREIGN KEY (`a_id`) REFERENCES `k_article` (`a_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_d_article_catorgery_relationship_d_article_catorgery_relatio2` FOREIGN KEY (`cat_id`) REFERENCES `k_category` (`cat_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE = InnoDB AUTO_INCREMENT = 117 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 128 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of k_article_category_relationship
 -- ----------------------------
 INSERT INTO `k_article_category_relationship` VALUES (115, 275, 145);
 INSERT INTO `k_article_category_relationship` VALUES (116, 1935, 146);
+INSERT INTO `k_article_category_relationship` VALUES (117, 275, 147);
+INSERT INTO `k_article_category_relationship` VALUES (118, 275, 149);
+INSERT INTO `k_article_category_relationship` VALUES (119, 275, 150);
+INSERT INTO `k_article_category_relationship` VALUES (120, 276, 151);
+INSERT INTO `k_article_category_relationship` VALUES (121, 278, 152);
+INSERT INTO `k_article_category_relationship` VALUES (122, 276, 153);
+INSERT INTO `k_article_category_relationship` VALUES (123, 276, 154);
+INSERT INTO `k_article_category_relationship` VALUES (124, 275, 155);
+INSERT INTO `k_article_category_relationship` VALUES (125, 275, 156);
+INSERT INTO `k_article_category_relationship` VALUES (126, 276, 157);
+INSERT INTO `k_article_category_relationship` VALUES (127, 1939, 158);
 
 -- ----------------------------
 -- Table structure for k_category
@@ -87,7 +110,7 @@ CREATE TABLE `k_category`  (
   `cat_level` smallint(1) NOT NULL DEFAULT 1,
   `cat_status` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`cat_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1938 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1944 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of k_category
@@ -120,6 +143,7 @@ INSERT INTO `k_category` VALUES (1931, '上班摸鱼', 0, 'hotpoint', 1, NULL, 1
 INSERT INTO `k_category` VALUES (1932, '内推招聘', 0, 'hotpoint', 1, NULL, 1, 1);
 INSERT INTO `k_category` VALUES (1935, '驳回模板', 0, 'template', 1, NULL, 1, 0);
 INSERT INTO `k_category` VALUES (1937, '回复模板', 0, 'template', 1, NULL, 1, 1);
+INSERT INTO `k_category` VALUES (1939, '计算机网络基础', 0, 'article', 1, NULL, 1, 1);
 
 -- ----------------------------
 -- Table structure for k_cms_user
@@ -142,11 +166,11 @@ CREATE TABLE `k_cms_user`  (
 -- ----------------------------
 -- Records of k_cms_user
 -- ----------------------------
-INSERT INTO `k_cms_user` VALUES (1, 'Kite1874', '123123', 'superadmin', NULL, '2021-01-21 19:39:13', '100000001', 14);
-INSERT INTO `k_cms_user` VALUES (14, '傻傻的管理员', '123123', 'admin', NULL, '2021-01-21 19:46:18', '000001', 15);
-INSERT INTO `k_cms_user` VALUES (15, '看到眼睛流脓的审核员', '123123', 'auditor', NULL, '2021-01-21 19:46:27', '000002', 16);
-INSERT INTO `k_cms_user` VALUES (16, '无情的码字机器', '123123', 'editor', NULL, '2021-01-21 19:46:33', '000003', 17);
-INSERT INTO `k_cms_user` VALUES (17, '打酱油专业户', '123123', 'visitor', NULL, '2021-01-21 19:46:39', '000004', 18);
+INSERT INTO `k_cms_user` VALUES (1, 'Kite1874', '123123', 'superadmin', NULL, '2021-02-16 19:36:11', '100000001', 14);
+INSERT INTO `k_cms_user` VALUES (14, '傻傻的管理员', '123123', 'admin', NULL, '2021-02-16 19:25:31', '000001', 15);
+INSERT INTO `k_cms_user` VALUES (15, '看到眼睛流脓的审核员', '123123', 'auditor', NULL, '2021-02-16 19:25:34', '000002', 16);
+INSERT INTO `k_cms_user` VALUES (16, '无情的码字机器', '123123', 'editor', NULL, '2021-02-16 19:25:36', '000003', 17);
+INSERT INTO `k_cms_user` VALUES (17, '打酱油专业户', '123123', 'visitor', NULL, '2021-02-16 19:25:38', '000004', 18);
 
 -- ----------------------------
 -- Table structure for k_comment
@@ -216,12 +240,16 @@ CREATE TABLE `k_hot_point`  (
   INDEX `fk_hp_category_catid`(`cat_id`) USING BTREE,
   CONSTRAINT `fk_hp_category_catid` FOREIGN KEY (`cat_id`) REFERENCES `k_category` (`cat_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_hp_user_uid` FOREIGN KEY (`u_id`) REFERENCES `k_user` (`u_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 12254 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 12258 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of k_hot_point
 -- ----------------------------
 INSERT INTO `k_hot_point` VALUES (12253, '若你喜欢怪人，其实我很美', NULL, '2021-01-21 19:42:45', 'normal', 0, 'recommend', NULL, 303, 14);
+INSERT INTO `k_hot_point` VALUES (12254, '123123213', NULL, '2021-03-01 15:22:24', 'normal', 0, 'normal', NULL, 303, 14);
+INSERT INTO `k_hot_point` VALUES (12255, '12312312', NULL, '2021-03-01 15:22:39', 'normal', 0, 'hot', NULL, 303, 14);
+INSERT INTO `k_hot_point` VALUES (12256, '不得了摸鱼就摸鱼', NULL, '2021-03-02 16:31:31', 'normal', 0, 'recommend', NULL, 1931, 14);
+INSERT INTO `k_hot_point` VALUES (12257, '测试', NULL, '2021-03-03 15:25:02', 'normal', 0, 'normal', NULL, 1932, 14);
 
 -- ----------------------------
 -- Table structure for k_hp_category_relationship
@@ -236,12 +264,16 @@ CREATE TABLE `k_hp_category_relationship`  (
   INDEX `fk_hp_cate_hp_id`(`hp_id`) USING BTREE,
   CONSTRAINT `fk_hp_cate_cat_id` FOREIGN KEY (`cat_id`) REFERENCES `k_category` (`cat_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_hp_cate_hp_id` FOREIGN KEY (`hp_id`) REFERENCES `k_hot_point` (`hp_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 12252 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 12256 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of k_hp_category_relationship
 -- ----------------------------
 INSERT INTO `k_hp_category_relationship` VALUES (12251, 12253, 303);
+INSERT INTO `k_hp_category_relationship` VALUES (12252, 12254, 303);
+INSERT INTO `k_hp_category_relationship` VALUES (12253, 12255, 303);
+INSERT INTO `k_hp_category_relationship` VALUES (12254, 12256, 1931);
+INSERT INTO `k_hp_category_relationship` VALUES (12255, 12257, 1932);
 
 -- ----------------------------
 -- Table structure for k_hp_comment
@@ -297,6 +329,7 @@ CREATE TABLE `k_router`  (
 -- Records of k_router
 -- ----------------------------
 INSERT INTO `k_router` VALUES (1, 'user', 'User', '用户管理', 0, 'superadmin,admin', 'el-icon-user', 1, '', 'Main', 0, 2, 1, NULL, '_self');
+INSERT INTO `k_router` VALUES (2, 'article', 'Article', '文章管理', 0, 'superadmin,admin,editor', 'el-icon-document', 1, NULL, 'Article', 0, 3, 1, NULL, '_self');
 INSERT INTO `k_router` VALUES (3, 'hotPoint', 'HotPoint', '沸点管理', 0, 'superadmin,admin,editor', 'el-icon-chat-square', 1, NULL, 'HotPoint', 0, 4, 1, NULL, '_self');
 INSERT INTO `k_router` VALUES (4, 'template', 'Template', '模板管理', 0, 'superadmin,admin,editor', 'el-icon-document-copy', 1, NULL, 'Template', 0, 5, 1, NULL, '_self');
 INSERT INTO `k_router` VALUES (5, 'category', 'Category', '分类管理', 0, 'superadmin,admin', 'el-icon-menu', 1, NULL, 'Main', 0, 6, 1, NULL, '_self');
@@ -304,7 +337,7 @@ INSERT INTO `k_router` VALUES (6, 'articleCategory', 'ArticleCategory', '文章�
 INSERT INTO `k_router` VALUES (7, 'hotPointCategory', 'HotPointCategory', '沸点分类', 0, 'superadmin,admin', NULL, 1, NULL, 'HotPointCategory', 5, 2, 2, NULL, '_self');
 INSERT INTO `k_router` VALUES (8, 'templateCategory', 'TemplateCategory', '模板分类', 0, 'superadmin,admin', NULL, 1, NULL, 'TemplateCategory', 5, 3, 2, NULL, '_self');
 INSERT INTO `k_router` VALUES (9, 'editor', 'Editor', '编辑器', 0, 'superadmin,admin,editor', 'el-icon-edit', 1, NULL, 'Editor', 0, 7, 1, NULL, '_self');
-INSERT INTO `k_router` VALUES (10, 'dashboard', 'Dashboard', 'Dashboard', 1, 'superadmin,admin,editor', 'el-icon-odometer', 1, NULL, 'Dashboard', 0, 1, 1, 0, '_self');
+INSERT INTO `k_router` VALUES (10, 'dashboard', 'Dashboard', 'Dashboard', 1, 'superadmin,admin,editor,visitor,auditor', 'el-icon-odometer', 1, NULL, 'Dashboard', 0, 1, 1, 0, '_self');
 INSERT INTO `k_router` VALUES (11, 'user_toc', 'UserToC', 'ToC用户', 0, 'superadmin,admin', NULL, 1, NULL, 'UserToC', 1, 1, 2, 0, '_self');
 INSERT INTO `k_router` VALUES (12, 'user_cms', 'UserCMS', 'CMS用户', 0, 'superadmin', NULL, 1, NULL, 'UserCMS', 1, 2, 2, NULL, '_self');
 INSERT INTO `k_router` VALUES (13, 'permission', 'Permission', '权限管理', 0, 'superadmin', 'el-icon-lock', 1, NULL, 'Main', 0, 1, 1, 0, '_self');
@@ -327,7 +360,7 @@ CREATE TABLE `k_user`  (
   `u_email` varchar(320) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `u_phone` varchar(11) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`u_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 20 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 22 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of k_user
@@ -338,99 +371,7 @@ INSERT INTO `k_user` VALUES (16, '看到眼睛流脓的审核员', '123123', 'to
 INSERT INTO `k_user` VALUES (17, '无情的码字机器', '123123', 'tocms', 0, NULL, 0, '2021-01-21 19:28:57', '000003@163.com', NULL);
 INSERT INTO `k_user` VALUES (18, '打酱油专业户', '123123', 'tocms', 0, NULL, 0, '2021-01-21 19:29:52', '000004@1874.com', NULL);
 INSERT INTO `k_user` VALUES (19, '我是一个普通到不能再普通的用户', '1231223', 'normal', 0, NULL, 1, '2021-01-21 19:45:44', 'kite123@123.com', NULL);
-
--- ----------------------------
--- Procedure structure for aa
--- ----------------------------
-DROP PROCEDURE IF EXISTS `aa`;
-delimiter ;;
-CREATE PROCEDURE `aa`()
-begin
-declare i int;
-SET i = 20;
-	WHILE
-			i < 200 DO
-			INSERT INTO `d_user` ( u_name, u_role, u_password, u_sex, u_icon )
-		VALUES
-			( CONCAT( 'kitee', i ), '0', '123456', '男', NULL );
-		
-		SET i = i + 1;
-		
-	END WHILE;
-end
-;;
-delimiter ;
-
--- ----------------------------
--- Procedure structure for test
--- ----------------------------
-DROP PROCEDURE IF EXISTS `test`;
-delimiter ;;
-CREATE PROCEDURE `test`()
-begin
-    declare i int;                      #申明变量
-    set i = 1933;                          #变量赋值
-    while i <= 12242 do                     #结束循环的条件: 当i大于10时跳出while循环
-        INSERT INTO k_hp_category_relationship (hp_id, cat_id) VALUES(i, 1932);    #往test表添加数据
-        set i = i + 1;                  #循环一次,i加一
-    end while;                          #结束while循环
-end
-;;
-delimiter ;
-
--- ----------------------------
--- Function structure for tree_child_lists
--- ----------------------------
-DROP FUNCTION IF EXISTS `tree_child_lists`;
-delimiter ;;
-CREATE FUNCTION `tree_child_lists`(root_id int)
- RETURNS varchar(1000) CHARSET utf8mb4
-begin
- 
-    declare temp varchar(1000);
-    declare temp_char varchar(1000);
- 
-    set temp = '$';
-    set temp_char = cast(root_id as char);
- 
-    while temp_char is not null do
-        set temp = concat(temp,',',temp_char);
-        select group_concat(cid) into temp_char from category where find_in_set(pid,temp_char) > 0;
-    end while;
-    
-    return temp;
- 
-end
-;;
-delimiter ;
-
--- ----------------------------
--- Function structure for tree_parent_lists
--- ----------------------------
-DROP FUNCTION IF EXISTS `tree_parent_lists`;
-delimiter ;;
-CREATE FUNCTION `tree_parent_lists`(cid int)
- RETURNS varchar(1000) CHARSET utf8mb4
-begin
- 
-    declare parent_list varchar(1000);
-    declare parent_temp varchar(1000);
- 
-    set parent_temp = cast(cid as char);
- 
-    while parent_temp is not null do
-        if (parent_list is not null) then
-            set parent_list = concat(parent_temp,',',parent_list);
-        else
-            set parent_list = concat(parent_temp);
-        end if;
-        select group_concat(pid) into parent_temp from category where find_in_set(cid,parent_temp) > 0;
-    end while;
-    
-    return parent_list;
- 
-end
-;;
-delimiter ;
+INSERT INTO `k_user` VALUES (20, 'CESSSSS', '123123', 'VIP', 1, NULL, 0, '2021-03-01 15:21:12', 'kite187419981@163.com', '19902825411');
+INSERT INTO `k_user` VALUES (21, 'c123123123', '123123123', 'tocms', 0, NULL, 0, '2021-03-01 15:28:57', 'kite18741991118@163.com', NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;

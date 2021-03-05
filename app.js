@@ -15,8 +15,8 @@ if (process.env.NODE_ENV === "development") {
   global.server = http.createServer(app)
   expressWs(app, global.server)
 } else if (process.env.NODE_ENV === "production") {
+  var httpsOption = require("./config/httpsOption")
   var https = require('https');
-  var httpsOption = require("../config/httpsOption")
   global.server = https.createServer(httpsOption, app);
   expressWs(app, global.server)
 }
@@ -36,8 +36,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 //跨域
 app.all('*', function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', '*');
-  res.header('Access-Control-Allow-Methods', '*');
+  res.header("Access-Control-Allow-Headers", "authorization,Authorization,DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type");
+  res.header("Access-Control-Allow-Methods","*");
   res.header('Content-Type', 'application/json;charset=utf-8');
   if (mimeType[req.url.split('.').pop()]) {
     console.log(req.url.split('.'))

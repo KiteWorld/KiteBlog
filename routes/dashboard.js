@@ -6,6 +6,7 @@ let dashboardDao = require('../dao/dashboardDao')
 
 //websocket链接 需要通过 app.ws/app.wss 调用
 global.app.ws('/dashboard', function (ws, req) {
+	console.log(req.protocol + '://' + req.get('host') + req.originalUrl)
 	let timer
 	ws.on('message', function (msg) {
 		if (!ws.protocol) {
