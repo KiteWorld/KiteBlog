@@ -11,7 +11,7 @@
  Target Server Version : 50731
  File Encoding         : 65001
 
- Date: 04/03/2021 11:16:26
+ Date: 15/04/2021 19:19:28
 */
 
 SET NAMES utf8mb4;
@@ -110,7 +110,7 @@ CREATE TABLE `k_category`  (
   `cat_level` smallint(1) NOT NULL DEFAULT 1,
   `cat_status` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`cat_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1944 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1945 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of k_category
@@ -144,6 +144,7 @@ INSERT INTO `k_category` VALUES (1932, '内推招聘', 0, 'hotpoint', 1, NULL, 1
 INSERT INTO `k_category` VALUES (1935, '驳回模板', 0, 'template', 1, NULL, 1, 0);
 INSERT INTO `k_category` VALUES (1937, '回复模板', 0, 'template', 1, NULL, 1, 1);
 INSERT INTO `k_category` VALUES (1939, '计算机网络基础', 0, 'article', 1, NULL, 1, 1);
+INSERT INTO `k_category` VALUES (1944, '123123123', 0, 'article', 1, NULL, 1, 1);
 
 -- ----------------------------
 -- Table structure for k_cms_user
