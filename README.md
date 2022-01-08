@@ -1,4 +1,6 @@
 
+### 项目为一年前写的，已停止维护。
+
 ### 项目文档 && 预览
 
 [项目文档「国内推荐」](http://kiteworld.gitee.io/kiteblog-site/) || [项目文档](https://kiteworld.github.io/kiteblog-site/) || [项目预览](https://kiteblog.cms.kite1874.com/#/adminLogin)
